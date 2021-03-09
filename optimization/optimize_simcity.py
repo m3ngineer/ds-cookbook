@@ -49,16 +49,16 @@ click_penalty = 1.1 # penalty for every click that occurs
 hours = 3
 total_time = 3600 * hours
 model += (constraint, "slot_constraint")
-model += (s <= (total_time / 720) * click_penalty , "seed_constraint")
-model += (o <= (total_time / 1800) * click_penalty , "ore_constraint")
-model += (m <= (total_time / 60) * click_penalty , "metal_constraint")
-model += (l <= (total_time / 180) * click_penalty , "log_constraint")
-model += (p <= (total_time / 540) * click_penalty , "plastic_constraint")
-model += (c <= (total_time / 7200) * click_penalty , "chemical_constraint")
-model += (t <= (total_time / 10800) * click_penalty , "textile_constraint")
-model += ((h * 60 + h * 180 + h * 840) * click_penalty <= total_time, "hammer_constraint")
-model += ((mt * 60 + mt * 160 + mt * 1200) * click_penalty <= total_time, "measuring_tape_constraint")
-model += ((sh * 60 + sh * 180 + sh * 540 + sh * 1800) * click_penalty <= total_time, "shovel_constraint")
+model += (s * 720 <= (total_time) * click_penalty , "seed_constraint")
+model += (o * 1800 <= (total_time) * click_penalty , "ore_constraint")
+model += (m * 60 <= (total_time) * click_penalty , "metal_constraint")
+model += (l * 180 <= (total_time) * click_penalty , "log_constraint")
+model += (p * 540 <= (total_time) * click_penalty , "plastic_constraint")
+model += (c * 7200 <= (total_time) * click_penalty , "chemical_constraint")
+model += (t * 10800<= (total_time) * click_penalty , "textile_constraint")
+model += (h * (60 + 180 + 840) * click_penalty <= total_time, "hammer_constraint")
+model += (mt * (60 + 160 + 1200) * click_penalty <= total_time, "measuring_tape_constraint")
+model += (sh * (60 + 180 + 540 + 1800) * click_penalty <= total_time, "shovel_constraint")
 
 # Solve the problem
 status = model.solve()
