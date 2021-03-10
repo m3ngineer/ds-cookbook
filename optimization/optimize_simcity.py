@@ -14,6 +14,8 @@ t = LpVariable(name="textile", lowBound=0)
 h = LpVariable(name="hammer", lowBound=0)
 mt = LpVariable(name="measuring tape", lowBound=0)
 sh = LpVariable(name="shovel", lowBound=0)
+pl = LpVariable(name="plank", lowBound=0)
+br = LpVariable(name="brick", lowBound=0)
 
 # Seed: 30
 # Ore: 40
@@ -25,6 +27,12 @@ sh = LpVariable(name="shovel", lowBound=0)
 # hammer: 90, 1 log, 1 metal 14 min
 # measuring tape: 110, 1 metal, 1 plastic, 20 min
 # shovel: 150, 1 metal, 1 log, 1 plastic, 30 time
+# chair: 2 log, 1 nail, 1  hammer
+# table: 1 plank, 2 nail, 1 hammer
+# leek: 2 seed
+# plank: 120, 2 log, 30 min
+# brick: 190, 2 ore, 20 min
+# nail: 2 metal, 5 min
 
 # Add the objective function to the model
 seed_discount = 0.1
@@ -37,12 +45,16 @@ textile_discount = 0
 hammer_discount = 0
 measuring_tape_discount = 0
 shovel_discount = 0
+brick_discount = 0
+plank_discount = 0
 model += 30 * s * (1 - seed_discount) + 40 * o * (1 - ore_discount) + 10 * m * (1 - metal_discount) \
     + 14 * l * (1 - log_discount) + 25 * p * (1 - plastic_discount) + 60 * c * (1 - chemical_discount) \
     + 90 * t * (1 - textile_discount) + 90 * h * (1 - hammer_discount) \
-    + 110 * mt * (1 - measuring_tape_discount) + 150 * sh * (1 - shovel_discount)
+    + 110 * mt * (1 - measuring_tape_discount) + 150 * sh * (1 - shovel_discount) \
+    + 120 * pl * (1 - plank_discount) + 190 * br * (1 - brick_discount)
 
-constraint = s + o + m + l + p + c + t <= 15
+total_factory_slots = 15
+constraint = s + o + m + l + p + c + t <= total_factory_slots
 
 # Add the constraints to the model
 click_penalty = 1.1 # penalty for every click that occurs
@@ -59,6 +71,8 @@ model += (t * 10800<= (total_time) * click_penalty , "textile_constraint")
 model += (h * (60 + 180 + 840) * click_penalty <= total_time, "hammer_constraint")
 model += (mt * (60 + 160 + 1200) * click_penalty <= total_time, "measuring_tape_constraint")
 model += (sh * (60 + 180 + 540 + 1800) * click_penalty <= total_time, "shovel_constraint")
+model += (pl * (180 + 1800) * click_penalty <= total_time, "plank_constraint")
+model += (br * (1800 + 1200) * click_penalty <= total_time, "brick_constraint")
 
 # Solve the problem
 status = model.solve()
