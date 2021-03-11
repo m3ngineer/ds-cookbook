@@ -34,6 +34,10 @@ br = LpVariable(name="brick", lowBound=0)
 # brick: 190, 2 ore, 20 min
 # nail: 2 metal, 5 min
 
+materials = {
+    'nail': {'material': [('metal', 2)], 'time': 300, 'revenue': 100},
+}
+
 # Add the objective function to the model
 seed_discount = 0.1
 ore_discount = 0
