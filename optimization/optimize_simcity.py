@@ -32,10 +32,23 @@ br = LpVariable(name="brick", lowBound=0)
 # leek: 2 seed
 # plank: 120, 2 log, 30 min
 # brick: 190, 2 ore, 20 min
-# nail: 2 metal, 5 min
+# nail: 80, 2 metal, 5 min
 
 materials = {
-    'nail': {'material': [('metal', 2)], 'time': 300, 'revenue': 100},
+    'nail': {'material': [('metal', 2)], 'time': 300, 'revenue': 80, 'discount': 0},
+    'brick': {'material': [('mineral', 2)], 'time': 1200, 'revenue': 190, 'discount': 0},
+    'plank': {'material': [('log', 2)], 'time': 1800, 'revenue': 120, 'discount': 0},
+    'leek': {'material': [('seed', 2)], 'time': 1200, 'revenue': 160, 'discount': 0},
+    # 'table': {'material': [('plank', 1), ('nail', 2), ('hammer', 1)], 'time': 1800, 'revenue': 80},
+    'seed': {'material': [], 'time': 720, 'revenue': 30, 'discount': 0},
+    'mineral': {'material': [], 'time': 1800, 'revenue': 40, 'discount': 0},
+    'log': {'material': [], 'time': 180, 'revenue': 14, 'discount': 0},
+    'plastic': {'material': [], 'time': 540, 'revenue': 25, 'discount': 0},
+    'chemical': {'material': [], 'time': 7200, 'revenue': 60, 'discount': 0},
+    'textile': {'material': [], 'time': 10800, 'revenue': 90, 'discount': 0},
+    'hammer': {'material': [('log', 1), ('metal', 1)], 'time': 840, 'revenue': 90, 'discount': 0},
+    'measuring_tape': {'material': [('log', 1), ('plastic', 1)], 'time': 1200, 'revenue': 110, 'discount': 0},
+    'shovel': {'material': [('metal', 1), ('plastic', 1), ('log', 1)], 'time': 1800, 'revenue': 150, 'discount': 0},
 }
 
 # Add the objective function to the model
@@ -56,6 +69,14 @@ model += 30 * s * (1 - seed_discount) + 40 * o * (1 - ore_discount) + 10 * m * (
     + 90 * t * (1 - textile_discount) + 90 * h * (1 - hammer_discount) \
     + 110 * mt * (1 - measuring_tape_discount) + 150 * sh * (1 - shovel_discount) \
     + 120 * pl * (1 - plank_discount) + 190 * br * (1 - brick_discount)
+
+expr = None
+for k,v in materials.items():
+    print(k)
+    expr += v['revenue'] * LpVariable(name=k, lowBound=0) * (1-v['discount'])
+
+print(expr)
+# model += expr
 
 total_factory_slots = 15
 constraint = s + o + m + l + p + c + t <= total_factory_slots
