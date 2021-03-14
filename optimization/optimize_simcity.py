@@ -35,6 +35,7 @@ model = LpProblem(name="sim-city", sense=LpMaximize)
 # nail: 80, 2 metal, 5 min
 
 materials = {
+    'metal': {'material': [], 'time': 60, 'revenue': 10, 'discount': 0},
     'nail': {'material': [('metal', 2)], 'time': 300, 'revenue': 80, 'discount': 0},
     'brick': {'material': [('mineral', 2)], 'time': 1200, 'revenue': 190, 'discount': 0},
     'plank': {'material': [('log', 2)], 'time': 1800, 'revenue': 120, 'discount': 0},
@@ -73,7 +74,7 @@ plank_discount = 0
 expr, constraint = None, None
 click_penalty = 1.1 # penalty for every click that occurs
 hours = 3
-total_time = 3600 * hours
+time_limit = 3600 * hours
 
 for k,v in materials.items():
     print(k)
@@ -81,7 +82,11 @@ for k,v in materials.items():
     expr += v['revenue'] * var
     constraint += var
 
-    model += (var * v['time'] <= (total_time) * click_penalty , "{}_constraint".format(k))
+    production_time = v['time']
+    for material in v['material']:
+        ingredient = material[0]
+        production_time += materials[ingredient]['time'] * material[1]
+    model += (var * production_time <= (time_limit) * click_penalty , "{}_constraint".format(k))
     # * (1-v['discount'])
 
 print(expr)
