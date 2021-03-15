@@ -21,15 +21,19 @@ materials = {
     'chair': {'material': [('log', 2), ('nail', 1), ('hammer', 1)], 'time': 1200, 'revenue': 300, 'discount': 0},
     'table': {'material': [('plank', 1), ('nail', 2), ('hammer', 1)], 'time': 1800, 'revenue': 80}, # check revenue
     'cement': {'material': [('mineral', 2), ('chemical', 1)], 'time': 3000, 'revenue': 80}, # check revenue, check time
+    'spices': {'material': [], 'time': 14400, 'revenue': 110, 'discount': 0},
     'glue': {'material': [('plastic', 1), ('chemical', 2)], 'time': 3600, 'revenue': 440},
     'paint': {'material': [('metal', 2), ('mineral', 1), ('chemical', 1)], 'time': 3600, 'revenue': 320},
+    'flour': {'material': [('seed', 2), ('textile', 2)], 'time': 2700, 'revenue': 570},
+    'donut': {'material': [('flour', 1), ('spices', 1)], 'time': 2700, 'revenue': 950},
+    # 'cooking_utensils': {'material': [('metal', 2), ('plastic', 2), ('log', 2)], 'time': 2700, 'revenue': 950}, #check revenue
     #flour 570
 }
 
 # Add the objective function to the model
 expr, constraint = None, None
 click_penalty = 1.1 # penalty for every click that occurs
-hours = 3
+hours = 6
 time_limit = 3600 * hours
 
 for k,v in materials.items():
