@@ -19,14 +19,17 @@ materials = {
     'measuring_tape': {'material': [('log', 1), ('plastic', 1)], 'time': 1200, 'revenue': 110, 'discount': 0},
     'shovel': {'material': [('metal', 1), ('plastic', 1), ('log', 1)], 'time': 1800, 'revenue': 150, 'discount': 0},
     'chair': {'material': [('log', 2), ('nail', 1), ('hammer', 1)], 'time': 1200, 'revenue': 300, 'discount': 0},
-    'table': {'material': [('plank', 1), ('nail', 2), ('hammer', 1)], 'time': 1800, 'revenue': 80}, # check revenue
-    'cement': {'material': [('mineral', 2), ('chemical', 1)], 'time': 3000, 'revenue': 80}, # check revenue, check time
+    'table': {'material': [('plank', 1), ('nail', 2), ('hammer', 1)], 'time': 1800, 'revenue': 500, 'discount': 0}, # check revenue
+    'cement': {'material': [('mineral', 2), ('chemical', 1)], 'time': 3000, 'revenue': 440, 'discount': 0},
     'spices': {'material': [], 'time': 14400, 'revenue': 110, 'discount': 0},
-    'glue': {'material': [('plastic', 1), ('chemical', 2)], 'time': 3600, 'revenue': 440},
-    'paint': {'material': [('metal', 2), ('mineral', 1), ('chemical', 1)], 'time': 3600, 'revenue': 320},
-    'flour': {'material': [('seed', 2), ('textile', 2)], 'time': 2700, 'revenue': 570},
-    'donut': {'material': [('flour', 1), ('spices', 1)], 'time': 2700, 'revenue': 950},
+    'glue': {'material': [('plastic', 1), ('chemical', 2)], 'time': 3600, 'revenue': 440, 'discount': 0},
+    'paint': {'material': [('metal', 2), ('mineral', 1), ('chemical', 1)], 'time': 3600, 'revenue': 320, 'discount': 0},
+    'flour': {'material': [('seed', 2), ('textile', 2)], 'time': 2700, 'revenue': 570, 'discount': 0},
+    'donut': {'material': [('flour', 1), ('spices', 1)], 'time': 2700, 'revenue': 950, 'discount': 0},
     # 'cooking_utensils': {'material': [('metal', 2), ('plastic', 2), ('log', 2)], 'time': 2700, 'revenue': 950}, #check revenue
+    'watermelon': {'material': [('seed', 2), ('tree', 1)], 'time': 5400, 'revenue': 730, 'discount': 0},
+    'tree': {'material': [('seed', 2), ('shovel', 1)], 'time': 5400, 'revenue': 730, 'discount': 0}, # check revenue
+    'grass': {'material': [('seed', 1), ('shovel', 1)], 'time': 1800, 'revenue': 730, 'discount': 0}, # check revenue
     #flour 570
 }
 
@@ -52,7 +55,7 @@ for k,v in materials.items():
 print(expr)
 model += expr
 
-total_factory_slots = 15
+total_factory_slots = 35
 
 # Add the constraints to the model
 click_penalty = 1.1 # penalty for every click that occurs
