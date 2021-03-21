@@ -26,11 +26,13 @@ materials = {
     'paint': {'material': [('metal', 2), ('mineral', 1), ('chemical', 1)], 'time': 3600, 'revenue': 320, 'discount': 0},
     'flour': {'material': [('seed', 2), ('textile', 2)], 'time': 2700, 'revenue': 570, 'discount': 0},
     'donut': {'material': [('flour', 1), ('spices', 1)], 'time': 2700, 'revenue': 950, 'discount': 0},
-    # 'cooking_utensils': {'material': [('metal', 2), ('plastic', 2), ('log', 2)], 'time': 2700, 'revenue': 950}, #check revenue
+    'cooking_utensils': {'material': [('metal', 2), ('plastic', 2), ('log', 2)], 'time': 2700, 'revenue': 250}, #check revenue
     'watermelon': {'material': [('seed', 2), ('tree', 1)], 'time': 5400, 'revenue': 730, 'discount': 0},
     'tree': {'material': [('seed', 2), ('shovel', 1)], 'time': 5400, 'revenue': 730, 'discount': 0}, # check revenue
-    'grass': {'material': [('seed', 1), ('shovel', 1)], 'time': 1800, 'revenue': 730, 'discount': 0}, # check revenue
-    #flour 570
+    'grass': {'material': [('seed', 1), ('shovel', 1)], 'time': 1800, 'revenue': 310, 'discount': 0},
+    'green_smoothie': {'material': [('leek', 1), ('watermelon', 1)], 'time': 1800, 'revenue': 1150, 'discount': 0},
+    'hat': {'material': [('textile', 1), ('measuring_tape', 1)], 'time': 3600, 'revenue': 600, 'discount': 0},
+    'flour': {'material': [('textile', 2), ('seed', 2)], 'time': 1800, 'revenue': 570, 'discount': 0},
 }
 
 # Add the objective function to the model
