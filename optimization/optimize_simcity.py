@@ -33,6 +33,7 @@ materials = {
     'green_smoothie': {'material': [('leek', 1), ('watermelon', 1)], 'time': 1800, 'revenue': 1150, 'discount': 0},
     'hat': {'material': [('textile', 1), ('measuring_tape', 1)], 'time': 3600, 'revenue': 600, 'discount': 0},
     'flour': {'material': [('textile', 2), ('seed', 2)], 'time': 1800, 'revenue': 570, 'discount': 0},
+    'cap': {'material': [('textile', 2), ('measuring_tape', 1)], 'time': 3600, 'revenue': 600, 'discount': 0},
 }
 
 # Add the objective function to the model
