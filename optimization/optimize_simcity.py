@@ -19,21 +19,22 @@ materials = {
     'measuring_tape': {'material': [('log', 1), ('plastic', 1)], 'time': 1200, 'revenue': 110, 'discount': 0},
     'shovel': {'material': [('metal', 1), ('plastic', 1), ('log', 1)], 'time': 1800, 'revenue': 150, 'discount': 0},
     'chair': {'material': [('log', 2), ('nail', 1), ('hammer', 1)], 'time': 1200, 'revenue': 300, 'discount': 0},
-    'table': {'material': [('plank', 1), ('nail', 2), ('hammer', 1)], 'time': 1800, 'revenue': 500, 'discount': 0}, # check revenue
+    'table': {'material': [('plank', 1), ('nail', 2), ('hammer', 1)], 'time': 1800, 'revenue': 500, 'discount': 0},
     'cement': {'material': [('mineral', 2), ('chemical', 1)], 'time': 3000, 'revenue': 440, 'discount': 0},
     'spices': {'material': [], 'time': 14400, 'revenue': 110, 'discount': 0},
     'glue': {'material': [('plastic', 1), ('chemical', 2)], 'time': 3600, 'revenue': 440, 'discount': 0},
     'paint': {'material': [('metal', 2), ('mineral', 1), ('chemical', 1)], 'time': 3600, 'revenue': 320, 'discount': 0},
     'flour': {'material': [('seed', 2), ('textile', 2)], 'time': 2700, 'revenue': 570, 'discount': 0},
     'donut': {'material': [('flour', 1), ('spices', 1)], 'time': 2700, 'revenue': 950, 'discount': 0},
-    'cooking_utensils': {'material': [('metal', 2), ('plastic', 2), ('log', 2)], 'time': 2700, 'revenue': 250}, #check revenue
-    'watermelon': {'material': [('seed', 2), ('tree', 1)], 'time': 5400, 'revenue': 730, 'discount': 0},
-    'tree': {'material': [('seed', 2), ('shovel', 1)], 'time': 5400, 'revenue': 730, 'discount': 0}, # check revenue
+    'spatula': {'material': [('metal', 2), ('plastic', 2), ('log', 2)], 'time': 2700, 'revenue': 250},
+    'watermelon': {'material': [('seed', 2), ('sapling', 1)], 'time': 5400, 'revenue': 730, 'discount': 0},
+    'sapling': {'material': [('seed', 2), ('shovel', 1)], 'time': 5400, 'revenue': 420, 'discount': 0},
     'grass': {'material': [('seed', 1), ('shovel', 1)], 'time': 1800, 'revenue': 310, 'discount': 0},
     'green_smoothie': {'material': [('leek', 1), ('watermelon', 1)], 'time': 1800, 'revenue': 1150, 'discount': 0},
     'hat': {'material': [('textile', 1), ('measuring_tape', 1)], 'time': 3600, 'revenue': 600, 'discount': 0},
     'flour': {'material': [('textile', 2), ('seed', 2)], 'time': 1800, 'revenue': 570, 'discount': 0},
     'cap': {'material': [('textile', 2), ('measuring_tape', 1)], 'time': 3600, 'revenue': 600, 'discount': 0},
+    'ladder': {'material': [('plank', 2), ('metal', 2)], 'time': 3600, 'revenue': 420, 'discount': 0},
 }
 
 # Add the objective function to the model
@@ -42,11 +43,14 @@ click_penalty = 1.1 # penalty for every click that occurs
 hours = 6
 time_limit = 3600 * hours
 
+vars = {}
 for k,v in materials.items():
     print(k)
     var = LpVariable(name=k, lowBound=0)
     expr += v['revenue'] * var
     constraint += var
+    vars[k] = var
+
 
     production_time = v['time']
     for material in v['material']:
@@ -66,6 +70,23 @@ hours = 3
 total_time = 3600 * hours
 # model += (constraint, "slot_constraint")
 model += (constraint <= total_factory_slots, "slot_constraint")
+
+# Add individual factory time limit constraints
+model += ( vars['nail'] * materials['nail']['time']
+            + vars['plank'] * materials['plank']['time']
+            + vars['brick'] * materials['brick']['time']
+            + vars['cement'] * materials['cement']['time']
+            + vars['glue'] * materials['glue']['time']
+            + vars['paint'] * materials['paint']['time'] <= total_time, "building_store_constraint")
+model += ( vars['hammer'] * materials['hammer']['time'] + \
+            vars['measuring_tape'] * materials['measuring_tape']['time'] +
+            vars['shovel'] * materials['shovel']['time'] +
+            vars['spatula'] * materials['spatula']['time'] +
+            vars['ladder'] * materials['ladder']['time'] <= total_time, "hardware_store_constraint")
+model += ( vars['leek'] * materials['leek']['time'] + \
+            vars['watermelon'] * materials['watermelon']['time'] <= total_time, "farmer_market_constraint")
+
+
 
 # Solve the problem
 status = model.solve()
