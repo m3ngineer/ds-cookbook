@@ -35,6 +35,8 @@ materials = {
     'flour': {'material': [('textile', 2), ('seed', 2)], 'time': 1800, 'revenue': 570, 'discount': 0},
     'cap': {'material': [('textile', 2), ('measuring_tape', 1)], 'time': 3600, 'revenue': 600, 'discount': 0},
     'ladder': {'material': [('plank', 2), ('metal', 2)], 'time': 3600, 'revenue': 420, 'discount': 0},
+    'garden_furniture': {'material': [('plank', 2), ('plastic', 2), ('textile', 2)], 'time': 4500, 'revenue': 820, 'discount': 0},
+    'sneaker': {'material': [('plastic', 1), ('glue', 1), ('textile', 2)], 'time': 2700, 'revenue': 980, 'discount': 0}, # check revenue
 }
 
 # Add the objective function to the model
