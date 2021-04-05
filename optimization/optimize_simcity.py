@@ -37,8 +37,10 @@ materials = {
     'ladder': {'material': [('plank', 2), ('metal', 2)], 'time': 3600, 'revenue': 420, 'discount': 0},
     'garden_furniture': {'material': [('plank', 2), ('plastic', 2), ('textile', 2)], 'time': 4500, 'revenue': 820, 'discount': 0},
     'sneaker': {'material': [('plastic', 1), ('glue', 1), ('textile', 2)], 'time': 2700, 'revenue': 980, 'discount': 0}, # check revenue
-    'watch': {'material': [('plastic', 1), ('glue', 1), ('textile', 2)], 'time': 2700, 'revenue': 580, 'discount': 0}, 
-    'animal_feed': {'material': , 'time': 21600, 'revenue': 140, 'discount': 0},
+    'watch': {'material': [('plastic', 1), ('glue', 1), ('textile', 2)], 'time': 2700, 'revenue': 580, 'discount': 0},
+    'animal_feed': {'material': [], 'time': 21600, 'revenue': 140, 'discount': 0},
+    'cream': {'material': [('animal_feed', 1)], 'time': 4500, 'revenue': 440, 'discount': 0},
+    'bread_roll': {'material': [('flour', 2), ('cream': 1)], 'time': 3600, 'revenue': 140, 'discount': 0}, # check revenue
 }
 
 # Add the objective function to the model
