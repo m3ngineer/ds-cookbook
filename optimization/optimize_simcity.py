@@ -36,17 +36,18 @@ materials = {
     'cap': {'material': [('textile', 2), ('measuring_tape', 1)], 'time': 3600, 'revenue': 600, 'discount': 0},
     'ladder': {'material': [('plank', 2), ('metal', 2)], 'time': 3600, 'revenue': 420, 'discount': 0},
     'garden_furniture': {'material': [('plank', 2), ('plastic', 2), ('textile', 2)], 'time': 4500, 'revenue': 820, 'discount': 0},
-    'sneaker': {'material': [('plastic', 1), ('glue', 1), ('textile', 2)], 'time': 2700, 'revenue': 980, 'discount': 0}, # check revenue
+    'sneaker': {'material': [('plastic', 1), ('glue', 1), ('textile', 2)], 'time': 2700, 'revenue': 980, 'discount': 0},
     'watch': {'material': [('plastic', 1), ('glue', 1), ('textile', 2)], 'time': 2700, 'revenue': 580, 'discount': 0},
     'animal_feed': {'material': [], 'time': 21600, 'revenue': 140, 'discount': 0},
     'cream': {'material': [('animal_feed', 1)], 'time': 4500, 'revenue': 440, 'discount': 0},
-    'bread_roll': {'material': [('flour', 2), ('cream': 1)], 'time': 3600, 'revenue': 140, 'discount': 0}, # check revenue
+    'bread_roll': {'material': [('flour', 2), ('cream', 1)], 'time': 3600, 'revenue': 1840, 'discount': 0},
+    'corn': {'material': [('mineral', 1), ('seed', 4)], 'time': 3600, 'revenue': 280, 'discount': 0},
 }
 
 # Add the objective function to the model
 expr, constraint = None, None
 click_penalty = 1.1 # penalty for every click that occurs
-hours = 6
+hours = 12
 time_limit = 3600 * hours
 
 vars = {}
@@ -93,6 +94,7 @@ model += ( vars['leek'] * materials['leek']['time'] + \
             vars['watermelon'] * materials['watermelon']['time'] <= total_time, "farmer_market_constraint")
 
 
+# TODO: Add in prerequisite order of items into constraint
 
 # Solve the problem
 status = model.solve()
