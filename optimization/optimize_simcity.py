@@ -42,6 +42,8 @@ materials = {
     'cream': {'material': [('animal_feed', 1)], 'time': 4500, 'revenue': 440, 'discount': 0},
     'bread_roll': {'material': [('flour', 2), ('cream', 1)], 'time': 3600, 'revenue': 1840, 'discount': 0},
     'corn': {'material': [('mineral', 1), ('seed', 4)], 'time': 3600, 'revenue': 280, 'discount': 0},
+    'cheese': {'material': [('animal_feed', 2)], 'time': 6300, 'revenue': 660, 'discount': 0}, #check revenue
+    'ice_cream_sandwich': {'material': [('bread_roll', 1), ('cream', 1)], 'time': 2560, 'revenue': 280, 'discount': 0}, #check revenue
 }
 
 # Add the objective function to the model
@@ -73,7 +75,7 @@ total_factory_slots = 35
 
 # Add the constraints to the model
 click_penalty = 1.1 # penalty for every click that occurs
-hours = 3
+hours = 12
 total_time = 3600 * hours
 # model += (constraint, "slot_constraint")
 model += (constraint <= total_factory_slots, "slot_constraint")
