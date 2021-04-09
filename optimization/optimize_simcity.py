@@ -44,6 +44,7 @@ materials = {
     'corn': {'material': [('mineral', 1), ('seed', 4)], 'time': 3600, 'revenue': 280, 'discount': 0},
     'cheese': {'material': [('animal_feed', 2)], 'time': 6300, 'revenue': 660, 'discount': 0}, #check revenue
     'ice_cream_sandwich': {'material': [('bread_roll', 1), ('cream', 1)], 'time': 2560, 'revenue': 280, 'discount': 0}, #check revenue
+    'home_textiles': {'material': [('textile', 1), ('measuring_tape', 1)], 'time': 6480, 'revenue': 280, 'discount': 0},#check revenue
 }
 
 # Add the objective function to the model
