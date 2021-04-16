@@ -43,9 +43,10 @@ materials = {
     'bread_roll': {'material': [('flour', 2), ('cream', 1)], 'time': 3600, 'revenue': 1840, 'discount': 0},
     'corn': {'material': [('mineral', 1), ('seed', 4)], 'time': 3600, 'revenue': 280, 'discount': 0},
     'cheese': {'material': [('animal_feed', 2)], 'time': 6300, 'revenue': 660, 'discount': 0}, #check revenue
-    'ice_cream_sandwich': {'material': [('bread_roll', 1), ('cream', 1)], 'time': 2560, 'revenue': 280, 'discount': 0}, #check revenue
-    'home_textiles': {'material': [('textile', 1), ('measuring_tape', 1)], 'time': 6480, 'revenue': 280, 'discount': 0},#check revenue
+    'ice_cream_sandwich': {'material': [('bread_roll', 1), ('cream', 1)], 'time': 2560, 'revenue': 2560, 'discount': 0},
+    'home_textiles': {'material': [('textile', 1), ('measuring_tape', 1)], 'time': 6480, 'revenue': 610, 'discount': 0},
     'fire_pit': {'material': [('brick', 2), ('shovel', 1), ('cement', 2)], 'time': 14400, 'revenue': 1740, 'discount': 0},
+    'cherry_cheesecake': {'material': [('flour', 1), ('watermelon', 1), ('cheese', 1)], 'time': 5400, 'revenue': 2240, 'discount': 0},
     'cherry_cheesecake': {'material': [('flour', 1), ('watermelon', 1), ('cheese', 1)], 'time': 5400, 'revenue': 2240, 'discount': 0},
 
 }
