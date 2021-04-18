@@ -47,7 +47,9 @@ materials = {
     'home_textiles': {'material': [('textile', 1), ('measuring_tape', 1)], 'time': 6480, 'revenue': 610, 'discount': 0},
     'fire_pit': {'material': [('brick', 2), ('shovel', 1), ('cement', 2)], 'time': 14400, 'revenue': 1740, 'discount': 0},
     'cherry_cheesecake': {'material': [('flour', 1), ('watermelon', 1), ('cheese', 1)], 'time': 5400, 'revenue': 2240, 'discount': 0},
-    'cherry_cheesecake': {'material': [('flour', 1), ('watermelon', 1), ('cheese', 1)], 'time': 5400, 'revenue': 2240, 'discount': 0},
+    'cupboard': {'material': [('plank', 2), ('glass', 2), ('paint', 1)], 'time': 2700, 'revenue': 900, 'discount': 0},
+    'frozen_yogurt': {'material': [('watermelon', 1), ('cream', 1), ('spices', 1)], 'time': 14400, 'revenue': 1750, 'discount': 0},
+    'glass': {'material': [], 'time': 18000, 'revenue': 120, 'discount': 0},
 
 }
 
