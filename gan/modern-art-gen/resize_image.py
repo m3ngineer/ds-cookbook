@@ -19,10 +19,10 @@ print('Resizing...')
 for filename in os.listdir(images_path):
     path = os.path.join(images_path, filename)
     image = Image.open(path).resize((IMAGE_SIZE, IMAGE_SIZE), Image.ANTIALIAS)
-    training_data.append(np.asarray(image.getdata()).reshape(128,128,3))
-    print(np.asarray(image.getdata()))
-    pix = np.array(image.getdata())
-    # training_data.append(pix.reshape(128,128,3))
+    training_data.append(np.asarray(image.getdata()).reshape(1,-1))
+    # print(np.asarray(image.getdata()))
+    # pix = np.array(image.getdata())
+    # training_data.append(pix.reshape(1,-1))
 
 
 # training_data = np.reshape(training_data, (-1, IMAGE_SIZE, IMAGE_SIZE, IMAGE_CHANNELS))
