@@ -50,6 +50,8 @@ materials = {
     'cupboard': {'material': [('plank', 2), ('glass', 2), ('paint', 1)], 'time': 2700, 'revenue': 900, 'discount': 0},
     'frozen_yogurt': {'material': [('watermelon', 1), ('cream', 1), ('spices', 1)], 'time': 14400, 'revenue': 1750, 'discount': 0},
     'glass': {'material': [], 'time': 18000, 'revenue': 120, 'discount': 0},
+    'pizza': {'material': [('flour', 1), ('cheese', 1), ('beef', 1)], 'time': 1440, 'revenue': 2560, 'discount': 0},
+    'beef': {'material': [], 'time': 8100, 'revenue': 120, 'discount': 0}, #check revenue
 
 }
 
