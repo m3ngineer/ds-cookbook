@@ -1,5 +1,5 @@
-from keras.layers import Input, Reshape, Dropout, Dense, Flatten, BatchNormalization, Activation, ZeroPadding2D
-from keras.layers.advanced_activations import LeakyReLU
+from keras.layers import Input, Reshape, Dropout, Dense, Flatten, \
+    BatchNormalization, Activation, ZeroPadding2D, LeakyReLU
 from keras.layers.convolutional import UpSampling2D, Conv2D
 from keras.models import Sequential, Model, load_model
 from keras.optimizers import Adam
@@ -35,11 +35,11 @@ def build_discriminator(image_shape):
 
     model.add(Conv2D(32, kernel_size=3, strides=2,
         input_shape = image_shape, padding="same"))
-    model.add(LeakyRelU(alpha=0.2))
+    model.add(LeakyReLU(alpha=0.2))
     model.add(Dropout(0.25))
 
     model.add(Conv2D(64, kernel_size=3, strides=2, padding="same"))
-    model.add(ZeroPadding2D(padding=(0.1, (0.1))))
+    model.add(ZeroPadding2D(padding=((0, 1), (0, 1))))
     model.add(LeakyReLU(alpha=0.2))
     model.add(Dropout(0.25))
 
@@ -48,7 +48,7 @@ def build_discriminator(image_shape):
     model.add(LeakyReLU(alpha=0.2))
     model.add(Dropout(0.25))
 
-    mode.add(Conv2D(256, kernel_size=3, strides=2, padding="same"))
+    model.add(Conv2D(256, kernel_size=3, strides=2, padding="same"))
     model.add(BatchNormalization(momentum=0.8))
     model.add(LeakyReLU(alpha=0.2))
 
@@ -97,7 +97,7 @@ def save_images(cnt, noise):
 
     image_array = np.full((PREVIEW_MARGIN + (PREVIEW_ROWS * (IMAGE_SIZE + PREVIEW_MARGIN)),
                     PREVIEW_MARGIN + (PREVIEW_COLS * (IMAGE_SIZE + PREVIEW_MARGIN)), 3),
-                    255, dtype=np.unit8)
+                    255, dtype=np.uint8)
     generated_images = generator.predict(noise)
     generated_images = 0.5 * generated_images + 0.5
 
@@ -112,7 +112,7 @@ def save_images(cnt, noise):
 
     output_path = 'output'
     if not os.path.exists(output_path):
-        os.makesirs(output_path)
+        os.makedirs(output_path)
 
     filename = os.path.join(output_path, f"trained-{cnt}.png")
     im = Image.fromarray(image_array)
