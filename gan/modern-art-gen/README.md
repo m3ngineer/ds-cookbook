@@ -24,4 +24,4 @@ Run the model training on Spell's GPU infrastructure
 ```spell run python art_gan.py -t V100 -m uploads/art_gan/<portrait_data.npy>```
 
 Download the outputs
-```Spell run python art_gan.py -t V100 -m uploads/art_gan/cubism_data.npy```
+```spell cp runs/<run number>```
