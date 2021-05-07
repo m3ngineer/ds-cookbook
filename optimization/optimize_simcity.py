@@ -51,7 +51,8 @@ materials = {
     'frozen_yogurt': {'material': [('watermelon', 1), ('cream', 1), ('spices', 1)], 'time': 14400, 'revenue': 1750, 'discount': 0},
     'glass': {'material': [], 'time': 18000, 'revenue': 120, 'discount': 0},
     'pizza': {'material': [('flour', 1), ('cheese', 1), ('beef', 1)], 'time': 1440, 'revenue': 2560, 'discount': 0},
-    'beef': {'material': [], 'time': 8100, 'revenue': 120, 'discount': 0}, #check revenue
+    'beef': {'material': [], 'time': 8100, 'revenue': 860, 'discount': 0},
+    'bbq_grill': {'material': [('spatula', 1), ('metal', 1)], 'time': 9900, 'revenue': 530, 'discount': 0},
 
 }
 
