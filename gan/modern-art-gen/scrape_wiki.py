@@ -32,9 +32,14 @@ genres = [('portrait',250),
 
 
 #Access the html of the page given a genre and pagenumber that are used to generate a url, from this html find the urls of all images hosted on the page using page layout as of June 2017, return a list of alls urls to paintings
-def soupit(j,genre):
+def soupit(j, genre=None, style=None):
+    if genre is None and style is None:
+        raise
     try:
-        url = "https://www.wikiart.org/en/paintings-by-genre/"+ genre+ "/" + str(j)
+        if genre:
+            url = "https://www.wikiart.org/en/paintings-by-genre/"+ genre+ "/" + str(j)
+        elif style:
+            url = "https://www.wikiart.org/en/paintings-by-style/"+ style+ "/" + str(j)
         html = urllib.request.urlopen(url)
         soup =  BeautifulSoup(html)
         found = False
@@ -56,7 +61,11 @@ def soupit(j,genre):
 
 #Given a url for an image, we download and save the image while also recovering information about the painting in the saved name depending on the length of the file.split('/') information (which corresponds to how much information is available)
 
-def dwnld(web,genre):
+def dwnld(web, genre=None, style=None):
+    if genre is None and style is None:
+        raise
+    if style:
+        genre = style
     i,file = web
     name = file.split('/')
     savename = ''
@@ -85,7 +94,11 @@ def dwnld(web,genre):
 
 
 #We can run both the url retrieving code and the image downloading code in parallel, and we set up the logic for that here
-def for_genre(genre,num):
+def for_genre(num, genre=None, style=None):
+    if genre is None and style is None:
+        raise
+    if style:
+        genre = style
     pool = ThreadPool(multiprocessing.cpu_count()-1)
     nums = list(range(1,num))
     results = pool.starmap(soupit,zip(nums,itertools.repeat(genre)))
