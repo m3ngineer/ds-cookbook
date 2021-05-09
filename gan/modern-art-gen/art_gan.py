@@ -26,7 +26,7 @@ IMAGE_SIZE = 128 # rows/cols
 IMAGE_CHANNELS = 3
 
 # Load data
-training_data = np.load('cubism_data.py')
+training_data = np.load('portrait_data.npy')
 
 # Create discriminator function
 def build_discriminator(image_shape):
@@ -137,6 +137,7 @@ y_real = np.ones((BATCH_SIZE, 1))
 y_fake = np.zeros((BATCH_SIZE, 1))
 fixed_noise = np.random.normal(0, 1, (PREVIEW_ROWS * PREVIEW_COLS, NOISE_SIZE))
 cnt = 1
+print(training_data.shape[0])
 for epoch in range(EPOCHS):
     idx = np.random.randint(0, training_data.shape[0], BATCH_SIZE)
     x_real = training_data[idx]

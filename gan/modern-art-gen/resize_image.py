@@ -23,6 +23,11 @@ for i, filename in enumerate(os.listdir(images_path)):
     path = os.path.join(images_path, filename)
     image = Image.open(path).resize((IMAGE_SIZE, IMAGE_SIZE), Image.ANTIALIAS)
     image_arr = np.asarray(image)[...,:3] # Convert image to array and first 3 channels
+    if image_arr.shape == (IMAGE_SIZE, IMAGE_SIZE,IMAGE_CHANNELS):
+        training_data.append(image_arr)
+    else:
+        # Discard non-uniform images
+        print('{} not included, image is shape {}'.format(filename, image_arr.shape))
 
 training_data = np.reshape(training_data, (-1, IMAGE_SIZE, IMAGE_SIZE, IMAGE_CHANNELS))
 training_data = training_data / 127.5 - 1
