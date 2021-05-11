@@ -32,14 +32,14 @@ genres = [('portrait',250),
 
 
 #Access the html of the page given a genre and pagenumber that are used to generate a url, from this html find the urls of all images hosted on the page using page layout as of June 2017, return a list of alls urls to paintings
-def soupit(j, genre=None, style=None):
-    if genre is None and style is None:
-        raise
+def soupit(j, category, category_type='genre'):
     try:
-        if genre:
+        if category_type == 'genre':
             url = "https://www.wikiart.org/en/paintings-by-genre/"+ genre+ "/" + str(j)
-        elif style:
+        elif category_type == 'style':
             url = "https://www.wikiart.org/en/paintings-by-style/"+ style+ "/" + str(j)
+        else:
+            url = "https://www.wikiart.org/en/paintings-by-" + category_type + "/"+ style+ "/" + str(j)
         html = urllib.request.urlopen(url)
         soup =  BeautifulSoup(html)
         found = False
@@ -56,27 +56,23 @@ def soupit(j, genre=None, style=None):
                     j = j+1
         return urls
     except Exception as e:
-        print('Failed to find the following genre page combo: '+genre+str(j))
+        print('Failed to find the following genre page combo: '+category+str(j))
 
 
 #Given a url for an image, we download and save the image while also recovering information about the painting in the saved name depending on the length of the file.split('/') information (which corresponds to how much information is available)
 
-def dwnld(web, genre=None, style=None):
-    if genre is None and style is None:
-        raise
-    if style:
-        genre = style
+def dwnld(web, category):
     i,file = web
     name = file.split('/')
     savename = ''
     if len(name) == 6:
-        savename = genre+"/"+ name[4] + "+" + name[5].split('.')[0] +".jpg"
+        savename = category+"/"+ name[4] + "+" + name[5].split('.')[0] +".jpg"
     if len(name) == 5:
-        savename = genre+"/"+name[4].split('.')[0]+".jpg"
+        savename = category+"/"+name[4].split('.')[0]+".jpg"
     if len(name) == 7:
-        savename = genre+"/"+ name[5] + "+" + name[6].split('.')[0] +".jpg"
+        savename = category+"/"+ name[5] + "+" + name[6].split('.')[0] +".jpg"
 
-    print(genre + str(i))
+    print(category + str(i))
     #If we get an exception in this operation it is probably because there was a nonstandard unicode character in the name of the painting, do some fancy magic to fix this in the exception handling code
     try:
         urllib.request.urlretrieve(file,savename)
@@ -94,11 +90,8 @@ def dwnld(web, genre=None, style=None):
 
 
 #We can run both the url retrieving code and the image downloading code in parallel, and we set up the logic for that here
-def for_genre(num, genre=None, style=None):
-    if genre is None and style is None:
-        raise
-    if style:
-        genre = style
+def for_category(num_pages, category):
+
     pool = ThreadPool(multiprocessing.cpu_count()-1)
     nums = list(range(1,num))
     results = pool.starmap(soupit,zip(nums,itertools.repeat(genre)))
@@ -113,12 +106,17 @@ def for_genre(num, genre=None, style=None):
                 new_results.append(i)
 
     pool = ThreadPool(multiprocessing.cpu_count()-1)
-    pool.starmap(dwnld,zip(enumerate(new_results),itertools.repeat(genre)))
+    pool.starmap(dwnld,zip(enumerate(new_results),itertools.repeat(category)))
     pool.close
     pool.close()
 
 if __name__ == '__main__':
-    for (a,b) in genres:
-        if not os.path.exists("./"+a):
-            os.mkdir(a)
-        for_genre(a,b)
+
+    category_type = 'style'
+    categories = [('naturalism', 15)]
+
+    for (style, num_pages) in categories:
+        if not os.path.exists("./"+category):
+            os.mkdir(style)
+
+    for_category(num_pages, category=style, category_type=category_type)
