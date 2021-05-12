@@ -35,15 +35,16 @@ genres = [('portrait',250),
 def soupit(j, category, category_type='genre'):
     try:
         if category_type == 'genre':
-            url = "https://www.wikiart.org/en/paintings-by-genre/"+ genre+ "/" + str(j)
+            url = "https://www.wikiart.org/en/paintings-by-genre/"+ genre+ "/"
         elif category_type == 'style':
-            url = "https://www.wikiart.org/en/paintings-by-style/"+ style+ "/" + str(j)
+            url = "https://www.wikiart.org/en/paintings-by-style/"+ style+ "/"
         else:
-            url = "https://www.wikiart.org/en/paintings-by-" + category_type + "/"+ style+ "/" + str(j)
+            url = "https://www.wikiart.org/en/paintings-by-" + category_type + "/"+ style+ "/"
         html = urllib.request.urlopen(url)
         soup =  BeautifulSoup(html)
         found = False
         urls = []
+
         for i in str(soup.findAll()).split():
             if i == 'data':
                 found = True
@@ -90,11 +91,11 @@ def dwnld(web, category):
 
 
 #We can run both the url retrieving code and the image downloading code in parallel, and we set up the logic for that here
-def for_category(num_pages, category):
+def for_category(num_pages, category, category_type):
 
     pool = ThreadPool(multiprocessing.cpu_count()-1)
-    nums = list(range(1,num))
-    results = pool.starmap(soupit,zip(nums,itertools.repeat(genre)))
+    nums = list(range(1,num_pages))
+    results = pool.starmap(soupit,zip(nums,itertools.repeat(category)))
     pool.close()
     pool.join()
 
@@ -115,8 +116,8 @@ if __name__ == '__main__':
     category_type = 'style'
     categories = [('naturalism', 15)]
 
-    for (style, num_pages) in categories:
+    for (category, num_pages) in categories:
         if not os.path.exists("./"+category):
-            os.mkdir(style)
+            os.mkdir(category)
 
-    for_category(num_pages, category=style, category_type=category_type)
+    for_category(num_pages, category=category, category_type=category_type)
