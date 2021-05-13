@@ -32,19 +32,15 @@ genres = [('portrait',250),
 
 
 #Access the html of the page given a genre and pagenumber that are used to generate a url, from this html find the urls of all images hosted on the page using page layout as of June 2017, return a list of alls urls to paintings
-def soupit(j, category, category_type='genre'):
+def soupit(category, category_type='genre'):
     try:
-        if category_type == 'genre':
-            url = "https://www.wikiart.org/en/paintings-by-genre/"+ genre+ "/"
-        elif category_type == 'style':
-            url = "https://www.wikiart.org/en/paintings-by-style/"+ style+ "/"
-        else:
-            url = "https://www.wikiart.org/en/paintings-by-" + category_type + "/"+ style+ "/"
+        url = 'https://www.wikiart.org/en/paintings-by-' + category_type + "/"+ category
         html = urllib.request.urlopen(url)
         soup =  BeautifulSoup(html)
         found = False
         urls = []
 
+        print(soup)
         for i in str(soup.findAll()).split():
             if i == 'data':
                 found = True
@@ -54,10 +50,11 @@ def soupit(j, category, category_type='genre'):
                 if 'https' in i:
                     web = "http" + i[6:-2]
                     urls.append(web)
-                    j = j+1
         return urls
     except Exception as e:
-        print('Failed to find the following genre page combo: '+category+str(j))
+        print(e)
+
+        print('Failed to find the following genre page combo: '+category)
 
 
 #Given a url for an image, we download and save the image while also recovering information about the painting in the saved name depending on the length of the file.split('/') information (which corresponds to how much information is available)
@@ -94,8 +91,7 @@ def dwnld(web, category):
 def for_category(num_pages, category, category_type):
 
     pool = ThreadPool(multiprocessing.cpu_count()-1)
-    nums = list(range(1,num_pages))
-    results = pool.starmap(soupit,zip(nums,itertools.repeat(category)))
+    results = pool.starmap(soupit,category)
     pool.close()
     pool.join()
 
@@ -113,8 +109,8 @@ def for_category(num_pages, category, category_type):
 
 if __name__ == '__main__':
 
-    category_type = 'style'
-    categories = [('naturalism', 15)]
+    category_type = 'media'
+    categories = [('aquatint', 15)]
 
     for (category, num_pages) in categories:
         if not os.path.exists("./"+category):
