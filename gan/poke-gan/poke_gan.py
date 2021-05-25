@@ -293,7 +293,7 @@ class GAN:
 
 
 def main():
-    dataset_path = 'data/jpg'
+    dataset_path = 'poke_gan'
     batch_size = 64
     image_shape = (64, 64, 3)
     epochs = 45
