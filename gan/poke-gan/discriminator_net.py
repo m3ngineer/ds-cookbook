@@ -1,3 +1,5 @@
+import tensorflow as tf
+from tensorflow import keras
 
 class Discriminator(keras.Model):
     def __init__(self):
@@ -13,6 +15,7 @@ class Discriminator(keras.Model):
         self.leaky_3 = keras.layers.LeakyReLU(alpha = 0.01)
 
         self.logits = keras.layers.Dense(units = 1)  # This neuron tells us if the input is fake or real
+
     def call(self, input_tensor):
           ## Definition of Forward Pass
         x = self.input_layer(input_tensor)
