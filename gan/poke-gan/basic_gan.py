@@ -81,3 +81,7 @@ def training_step(generator: Discriminator, discriminator: Discriminator, images
 
 generator_optimizer = keras.optimizers.RMSprop()
 discriminator_optimizer = keras.optimizers.RMSprop()
+
+
+%%time
+training(train_dataset, EPOCHES)
