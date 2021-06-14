@@ -1,186 +1,137 @@
-#!/usr/bin/env python
-
-# Generative Adversarial Networks (GAN) example in PyTorch. Tested with PyTorch 0.4.1, Python 3.6.7 (Nov 2018)
-# See related blog post at https://medium.com/@devnag/generative-adversarial-networks-gans-in-50-lines-of-code-pytorch-e81b79659e3f#.sch4xgsa9
-
-import numpy as np
+from __future__ import print_function
+import argparse
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.optim as optim
-from torch.autograd import Variable
+from torchvision import datasets, transforms
+from torch.optim.lr_scheduler import StepLR
 
-matplotlib_is_available = True
-try:
-  from matplotlib import pyplot as plt
-except ImportError:
-  print("Will skip plotting; matplotlib is not available.")
-  matplotlib_is_available = False
 
-# Data params
-data_mean = 4
-data_stddev = 1.25
-
-# ### Uncomment only one of these to define what data is actually sent to the Discriminator
-#(name, preprocess, d_input_func) = ("Raw data", lambda data: data, lambda x: x)
-#(name, preprocess, d_input_func) = ("Data and variances", lambda data: decorate_with_diffs(data, 2.0), lambda x: x * 2)
-#(name, preprocess, d_input_func) = ("Data and diffs", lambda data: decorate_with_diffs(data, 1.0), lambda x: x * 2)
-(name, preprocess, d_input_func) = ("Only 4 moments", lambda data: get_moments(data), lambda x: 4)
-
-print("Using data [%s]" % (name))
-
-# ##### DATA: Target data and generator input data
-
-def get_distribution_sampler(mu, sigma):
-    return lambda n: torch.Tensor(np.random.normal(mu, sigma, (1, n)))  # Gaussian
-
-def get_generator_input_sampler():
-    return lambda m, n: torch.rand(m, n)  # Uniform-dist data into generator, _NOT_ Gaussian
-
-# ##### MODELS: Generator model and discriminator model
-
-class Generator(nn.Module):
-    def __init__(self, input_size, hidden_size, output_size, f):
-        super(Generator, self).__init__()
-        self.map1 = nn.Linear(input_size, hidden_size)
-        self.map2 = nn.Linear(hidden_size, hidden_size)
-        self.map3 = nn.Linear(hidden_size, output_size)
-        self.f = f
+class Net(nn.Module):
+    def __init__(self):
+        super(Net, self).__init__()
+        self.conv1 = nn.Conv2d(1, 32, 3, 1)
+        self.conv2 = nn.Conv2d(32, 64, 3, 1)
+        self.dropout1 = nn.Dropout(0.25)
+        self.dropout2 = nn.Dropout(0.5)
+        self.fc1 = nn.Linear(9216, 128)
+        self.fc2 = nn.Linear(128, 10)
 
     def forward(self, x):
-        x = self.map1(x)
-        x = self.f(x)
-        x = self.map2(x)
-        x = self.f(x)
-        x = self.map3(x)
-        return x
-
-class Discriminator(nn.Module):
-    def __init__(self, input_size, hidden_size, output_size, f):
-        super(Discriminator, self).__init__()
-        self.map1 = nn.Linear(input_size, hidden_size)
-        self.map2 = nn.Linear(hidden_size, hidden_size)
-        self.map3 = nn.Linear(hidden_size, output_size)
-        self.f = f
-
-    def forward(self, x):
-        x = self.f(self.map1(x))
-        x = self.f(self.map2(x))
-        return self.f(self.map3(x))
-
-def extract(v):
-    return v.data.storage().tolist()
-
-def stats(d):
-    return [np.mean(d), np.std(d)]
-
-def get_moments(d):
-    # Return the first 4 moments of the data provided
-    mean = torch.mean(d)
-    diffs = d - mean
-    var = torch.mean(torch.pow(diffs, 2.0))
-    std = torch.pow(var, 0.5)
-    zscores = diffs / std
-    skews = torch.mean(torch.pow(zscores, 3.0))
-    kurtoses = torch.mean(torch.pow(zscores, 4.0)) - 3.0  # excess kurtosis, should be 0 for Gaussian
-    final = torch.cat((mean.reshape(1,), std.reshape(1,), skews.reshape(1,), kurtoses.reshape(1,)))
-    return final
-
-def decorate_with_diffs(data, exponent, remove_raw_data=False):
-    mean = torch.mean(data.data, 1, keepdim=True)
-    mean_broadcast = torch.mul(torch.ones(data.size()), mean.tolist()[0][0])
-    diffs = torch.pow(data - Variable(mean_broadcast), exponent)
-    if remove_raw_data:
-        return torch.cat([diffs], 1)
-    else:
-        return torch.cat([data, diffs], 1)
-
-def train():
-    # Model parameters
-    g_input_size = 1      # Random noise dimension coming into generator, per output vector
-    g_hidden_size = 5     # Generator complexity
-    g_output_size = 1     # Size of generated output vector
-    d_input_size = 500    # Minibatch size - cardinality of distributions
-    d_hidden_size = 10    # Discriminator complexity
-    d_output_size = 1     # Single dimension for 'real' vs. 'fake' classification
-    minibatch_size = d_input_size
-
-    d_learning_rate = 1e-3
-    g_learning_rate = 1e-3
-    sgd_momentum = 0.9
-
-    num_epochs = 5000
-    print_interval = 100
-    d_steps = 20
-    g_steps = 20
-
-    dfe, dre, ge = 0, 0, 0
-    d_real_data, d_fake_data, g_fake_data = None, None, None
-
-    discriminator_activation_function = torch.sigmoid
-    generator_activation_function = torch.tanh
-
-    d_sampler = get_distribution_sampler(data_mean, data_stddev)
-    gi_sampler = get_generator_input_sampler()
-    G = Generator(input_size=g_input_size,
-                  hidden_size=g_hidden_size,
-                  output_size=g_output_size,
-                  f=generator_activation_function)
-    D = Discriminator(input_size=d_input_func(d_input_size),
-                      hidden_size=d_hidden_size,
-                      output_size=d_output_size,
-                      f=discriminator_activation_function)
-    criterion = nn.BCELoss()  # Binary cross entropy: http://pytorch.org/docs/nn.html#bceloss
-    d_optimizer = optim.SGD(D.parameters(), lr=d_learning_rate, momentum=sgd_momentum)
-    g_optimizer = optim.SGD(G.parameters(), lr=g_learning_rate, momentum=sgd_momentum)
-
-    for epoch in range(num_epochs):
-        for d_index in range(d_steps):
-            # 1. Train D on real+fake
-            D.zero_grad()
-
-            #  1A: Train D on real
-            d_real_data = Variable(d_sampler(d_input_size))
-            d_real_decision = D(preprocess(d_real_data))
-            d_real_error = criterion(d_real_decision, Variable(torch.ones([1,1])))  # ones = true
-            d_real_error.backward() # compute/store gradients, but don't change params
-
-            #  1B: Train D on fake
-            d_gen_input = Variable(gi_sampler(minibatch_size, g_input_size))
-            d_fake_data = G(d_gen_input).detach()  # detach to avoid training G on these labels
-            d_fake_decision = D(preprocess(d_fake_data.t()))
-            d_fake_error = criterion(d_fake_decision, Variable(torch.zeros([1,1])))  # zeros = fake
-            d_fake_error.backward()
-            d_optimizer.step()     # Only optimizes D's parameters; changes based on stored gradients from backward()
-
-            dre, dfe = extract(d_real_error)[0], extract(d_fake_error)[0]
-
-        for g_index in range(g_steps):
-            # 2. Train G on D's response (but DO NOT train D on these labels)
-            G.zero_grad()
-
-            gen_input = Variable(gi_sampler(minibatch_size, g_input_size))
-            g_fake_data = G(gen_input)
-            dg_fake_decision = D(preprocess(g_fake_data.t()))
-            g_error = criterion(dg_fake_decision, Variable(torch.ones([1,1])))  # Train G to pretend it's genuine
-
-            g_error.backward()
-            g_optimizer.step()  # Only optimizes G's parameters
-            ge = extract(g_error)[0]
-
-        if epoch % print_interval == 0:
-            print("Epoch %s: D (%s real_err, %s fake_err) G (%s err); Real Dist (%s),  Fake Dist (%s) " %
-                  (epoch, dre, dfe, ge, stats(extract(d_real_data)), stats(extract(d_fake_data))))
-
-    if matplotlib_is_available:
-        print("Plotting the generated distribution...")
-        values = extract(g_fake_data)
-        print(" Values: %s" % (str(values)))
-        plt.hist(values, bins=50)
-        plt.xlabel('Value')
-        plt.ylabel('Count')
-        plt.title('Histogram of Generated Distribution')
-        plt.grid(True)
-        plt.show()
+        x = self.conv1(x)
+        x = F.relu(x)
+        x = self.conv2(x)
+        x = F.relu(x)
+        x = F.max_pool2d(x, 2)
+        x = self.dropout1(x)
+        x = torch.flatten(x, 1)
+        x = self.fc1(x)
+        x = F.relu(x)
+        x = self.dropout2(x)
+        x = self.fc2(x)
+        output = F.log_softmax(x, dim=1)
+        return output
 
 
-train()
+def train(args, model, device, train_loader, optimizer, epoch):
+    model.train()
+    for batch_idx, (data, target) in enumerate(train_loader):
+        data, target = data.to(device), target.to(device)
+        optimizer.zero_grad()
+        output = model(data)
+        loss = F.nll_loss(output, target)
+        loss.backward()
+        optimizer.step()
+        if batch_idx % args.log_interval == 0:
+            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+                epoch, batch_idx * len(data), len(train_loader.dataset),
+                100. * batch_idx / len(train_loader), loss.item()))
+            if args.dry_run:
+                break
+
+
+def test(model, device, test_loader):
+    model.eval()
+    test_loss = 0
+    correct = 0
+    with torch.no_grad():
+        for data, target in test_loader:
+            data, target = data.to(device), target.to(device)
+            output = model(data)
+            test_loss += F.nll_loss(output, target, reduction='sum').item()  # sum up batch loss
+            pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
+            correct += pred.eq(target.view_as(pred)).sum().item()
+
+    test_loss /= len(test_loader.dataset)
+
+    print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+        test_loss, correct, len(test_loader.dataset),
+        100. * correct / len(test_loader.dataset)))
+
+
+def main():
+    # Training settings
+    parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
+    parser.add_argument('--batch-size', type=int, default=64, metavar='N',
+                        help='input batch size for training (default: 64)')
+    parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
+                        help='input batch size for testing (default: 1000)')
+    parser.add_argument('--epochs', type=int, default=14, metavar='N',
+                        help='number of epochs to train (default: 14)')
+    parser.add_argument('--lr', type=float, default=1.0, metavar='LR',
+                        help='learning rate (default: 1.0)')
+    parser.add_argument('--gamma', type=float, default=0.7, metavar='M',
+                        help='Learning rate step gamma (default: 0.7)')
+    parser.add_argument('--no-cuda', action='store_true', default=False,
+                        help='disables CUDA training')
+    parser.add_argument('--dry-run', action='store_true', default=False,
+                        help='quickly check a single pass')
+    parser.add_argument('--seed', type=int, default=1, metavar='S',
+                        help='random seed (default: 1)')
+    parser.add_argument('--log-interval', type=int, default=10, metavar='N',
+                        help='how many batches to wait before logging training status')
+    parser.add_argument('--save-model', action='store_true', default=False,
+                        help='For Saving the current Model')
+    args = parser.parse_args()
+    use_cuda = not args.no_cuda and torch.cuda.is_available()
+
+    torch.manual_seed(args.seed)
+
+    device = torch.device("cuda" if use_cuda else "cpu")
+
+    train_kwargs = {'batch_size': args.batch_size}
+    test_kwargs = {'batch_size': args.test_batch_size}
+    if use_cuda:
+        cuda_kwargs = {'num_workers': 1,
+                       'pin_memory': True,
+                       'shuffle': True}
+        train_kwargs.update(cuda_kwargs)
+        test_kwargs.update(cuda_kwargs)
+
+    transform=transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.1307,), (0.3081,))
+        ])
+    dataset1 = datasets.MNIST('../data', train=True, download=True,
+                       transform=transform)
+    dataset2 = datasets.MNIST('../data', train=False,
+                       transform=transform)
+    train_loader = torch.utils.data.DataLoader(dataset1,**train_kwargs)
+    test_loader = torch.utils.data.DataLoader(dataset2, **test_kwargs)
+
+    model = Net().to(device)
+    optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
+
+    scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
+    for epoch in range(1, args.epochs + 1):
+        train(args, model, device, train_loader, optimizer, epoch)
+        test(model, device, test_loader)
+        scheduler.step()
+
+    if args.save_model:
+        torch.save(model.state_dict(), "mnist_cnn.pt")
+
+
+if __name__ == '__main__':
+    main()
