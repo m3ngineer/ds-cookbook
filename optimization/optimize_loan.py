@@ -25,5 +25,20 @@ print(f'${profit_calculator(42, 40)}')
 x = list(range(100))
 y = [profit_calculator(x, 40) for x in x]
 
-plt.plot(x, y)
-plt.show()
+# plt.plot(x, y)
+# plt.show()
+
+
+rental_income = sum([750, 900, 1200])
+operating_expenses = {
+    'mortgage': 346,
+    'property_taxes': 216,
+    'insurance': 46,
+    'property_management': 90,
+    'vacancy_reserves': 50,
+    'repair_reserves': 100
+}
+
+total_expenses = sum([v for v in operating_expenses.values()])
+cash_flow = rental_income - total_expenses
+print(f'Monthly cash flow: ${cash_flow:.2f}')
