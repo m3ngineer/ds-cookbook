@@ -198,6 +198,20 @@ fake_label = 0.
 optimizerD = optim.Adam(netD.parameters(), lr=lr, betas=(beta1, 0.999))
 optimizerG = optim.Adam(netG.parameters(), lr=lr, betas=(beta1, 0.999))
 
+# Saving model during training at checkpoints and when model improves
+def save_model(model_state, path):
+
+    torch.save(model_state, os.path.join(path, 'model_checkpoint.pt'))
+    # If loss is better then previous checkpoint
+    loss_gen = model_state['loss_gen']
+    loss_dis = model_state['loss_dis']
+    loss_gen_min = model_state['loss_gen_min']
+    loss_dis_min = model_state['loss_dis_min']
+    if (loss_gen <= loss_gen_min) & (loss_dis <= loss_dis_min):
+        print('Validation loss decreased (Generator: {:.6f} --> {:.6f}, Discriminator: {:.6f} --> {:.6f}).  Saving model ...'.format(loss_gen_min,loss_gen,loss_dis_min,loss_dis))
+    torch.save(model_state, os.path.join(path, 'model.pt'))
+
+
 # Training Loop
 
 # Lists to keep track of progress
@@ -271,6 +285,23 @@ for epoch in range(num_epochs):
         # Save Losses for plotting later
         G_losses.append(errG.item())
         D_losses.append(errD.item())
+
+        loss_gen_min = min(G_losses)
+        loss_dis_min = min(D_losses)
+
+        # Save models
+        model_state = {
+                    'epoch': epoch + 1,
+                    'loss_gen': errG,
+                    'loss_dis': errD,
+                    'loss_gen_min': loss_gen_min,
+                    'loss_dis_min': loss_dis_min,
+                    'model_gen_state_dict': netG.state_dict(),
+                    'model_dis_state_dict': netD.state_dict(),
+                    'optimizer_gen_state_dict': optimizerG.state_dict(),
+                    'optimizer_dis_state_dict': optimizerD.state_dict(),
+                }
+        save_model(model_state, dataroot)
 
         # Check how the generator is doing by saving G's output on fixed_noise
         if (iters % 500 == 0) or ((epoch == num_epochs-1) and (i == len(dataloader)-1)):
