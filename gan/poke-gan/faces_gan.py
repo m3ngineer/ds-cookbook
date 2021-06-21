@@ -282,26 +282,26 @@ for epoch in range(num_epochs):
                   % (epoch, num_epochs, i, len(dataloader),
                      errD.item(), errG.item(), D_x, D_G_z1, D_G_z2))
 
+            # Save models
+            model_state = {
+                        'epoch': epoch + 1,
+                        'loss_gen':  errG,
+                        'loss_dis': errD,
+                        'loss_gen_min': loss_gen_min,
+                        'loss_dis_min': loss_dis_min,
+                        'model_gen_state_dict': netG.state_dict(),
+                        'model_dis_state_dict': netD.state_dict(),
+                        'optimizer_gen_state_dict': optimizerG.state_dict(),
+                        'optimizer_dis_state_dict': optimizerD.state_dict(),
+                    }
+            save_model(model_state, dataroot)
+
         # Save Losses for plotting later
         G_losses.append(errG.item())
         D_losses.append(errD.item())
 
         loss_gen_min = min(G_losses)
         loss_dis_min = min(D_losses)
-
-        # Save models
-        model_state = {
-                    'epoch': epoch + 1,
-                    'loss_gen': errG,
-                    'loss_dis': errD,
-                    'loss_gen_min': loss_gen_min,
-                    'loss_dis_min': loss_dis_min,
-                    'model_gen_state_dict': netG.state_dict(),
-                    'model_dis_state_dict': netD.state_dict(),
-                    'optimizer_gen_state_dict': optimizerG.state_dict(),
-                    'optimizer_dis_state_dict': optimizerD.state_dict(),
-                }
-        save_model(model_state, dataroot)
 
         # Check how the generator is doing by saving G's output on fixed_noise
         if (iters % 500 == 0) or ((epoch == num_epochs-1) and (i == len(dataloader)-1)):
