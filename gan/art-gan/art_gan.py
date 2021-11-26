@@ -69,173 +69,123 @@ train_loader = torch.utils.data.DataLoader(
     train_set, batch_size=batch_size, shuffle=True
 )
 
-# Plot examples of training data
-real_samples, mnist_labels = next(iter(train_loader))
-for i in range(16):
-    ax = plt.subplot(4, 4, i + 1)
-    plt.imshow(real_samples[i].reshape(28, 28), cmap="gray_r")
-    plt.xticks([])
-    plt.yticks([])
+# Size of the generator's input vector.
+# Generator will eventually learn how to map these into meaningful images!
+LATENT_SPACE_DIM = 100
 
-# Generate neural network
-class Discriminator(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.model = nn.Sequential(
-            nn.Linear(784, 1024),
-            nn.ReLU(),
-            nn.Dropout(0.3),
-            nn.Linear(1024, 512),
-            nn.ReLU(),
-            nn.Dropout(0.3),
-            nn.Linear(512, 256),
-            nn.ReLU(),
-            nn.Dropout(0.3),
-            nn.Linear(256, 1),
-            nn.Sigmoid(),
-        )
 
-    def forward(self, x):
-        x = x.view(x.size(0), 784)
-        output = self.model(x)
-        return output
+# This one will produce a batch of those vectors
+def get_gaussian_latent_batch(batch_size, device):
+    return torch.randn((batch_size, LATENT_SPACE_DIM), device=device)
 
-class Generator(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.model = nn.Sequential(
-            nn.Linear(100, 256),
-            nn.ReLU(),
-            nn.Linear(256, 512),
-            nn.ReLU(),
-            nn.Linear(512, 1024),
-            nn.ReLU(),
-            nn.Linear(1024, 784),
-            nn.Tanh(),
-        )
 
-    def forward(self, x):
-        output = self.model(x)
-        output = output.view(x.size(0), 1, 28, 28)
-        return output
+# It's cleaner if you define the block like this - bear with me
+def vanilla_block(in_feat, out_feat, normalize=True, activation=None):
+    layers = [nn.Linear(in_feat, out_feat)]
+    if normalize:
+        layers.append(nn.BatchNorm1d(out_feat))
+    # 0.2 was used in DCGAN, I experimented with other values like 0.5 didn't notice significant change
+    layers.append(nn.LeakyReLU(0.2) if activation is None else activation)
+    return layers
 
-def save_images(self, generated_images, epoch_no, batch_no):
+class GeneratorNet(torch.nn.Module):
+    """Simple 4-layer MLP generative neural network.
+
+    By default it works for MNIST size images (28x28).
+
+    There are many ways you can construct generator to work on MNIST.
+    Even without normalization layers it will work ok. Even with 5 layers it will work ok, etc.
+
+    It's generally an open-research question on how to evaluate GANs i.e. quantify that "ok" statement.
+
+    People tried to automate the task using IS (inception score, often used incorrectly), etc.
+    but so far it always ends up with some form of visual inspection (human in the loop).
+
+    Fancy way of saying you'll have to take a look at the images from your generator and say hey this looks good!
+
     """
-    Shows and saves generated images
-    :param generated_images:
-    :param epoch_no:
-    :param batch_no:
-    :return:
+
+    def __init__(self, img_shape=(MNIST_IMG_SIZE, MNIST_IMG_SIZE)):
+        super().__init__()
+        self.generated_img_shape = img_shape
+        num_neurons_per_layer = [LATENT_SPACE_DIM, 256, 512, 1024, img_shape[0] * img_shape[1]]
+
+        # Now you see why it's nice to define blocks - it's super concise!
+        # These are pretty much just linear layers followed by LeakyReLU and batch normalization
+        # Except for the last layer where we exclude batch normalization and we add Tanh (maps images into [-1, 1])
+        self.net = nn.Sequential(
+            *vanilla_block(num_neurons_per_layer[0], num_neurons_per_layer[1]),
+            *vanilla_block(num_neurons_per_layer[1], num_neurons_per_layer[2]),
+            *vanilla_block(num_neurons_per_layer[2], num_neurons_per_layer[3]),
+            *vanilla_block(num_neurons_per_layer[3], num_neurons_per_layer[4], normalize=False, activation=nn.Tanh())
+        )
+
+    def forward(self, latent_vector_batch):
+        img_batch_flattened = self.net(latent_vector_batch)
+        # just un-flatten using view into (N, 1, 28, 28) shape for MNIST
+        return img_batch_flattened.view(img_batch_flattened.shape[0], 1, *self.generated_img_shape)
+
+# You can interpret the output from the discriminator as a probability and the question it should
+# give an answer to is "hey is this image real?". If it outputs 1. it's 100% sure it's real. 0.5 - 50% sure, etc.
+class DiscriminatorNet(torch.nn.Module):
+    """Simple 3-layer MLP discriminative neural network. It should output probability 1. for real images and 0. for fakes.
+
+    By default it works for MNIST size images (28x28).
+
+    Again there are many ways you can construct discriminator network that would work on MNIST.
+    You could use more or less layers, etc. Using normalization as in the DCGAN paper doesn't work well though.
+
     """
-    plt.figure(figsize=(8, 8), num=2)
-    gs1 = gridspec.GridSpec(8, 8)
-    gs1.update(wspace=0, hspace=0)
 
-    for i in range(64):
-        ax1 = plt.subplot(gs1[i])
-        ax1.set_aspect('equal')
-        image = generated_images[i, :, :, :]
-        image += 1
-        image *= 127.5
-        fig = plt.imshow(image.astype(np.uint8))
-        plt.axis('off')
-        fig.axes.get_xaxis().set_visible(False)
-        fig.axes.get_yaxis().set_visible(False)
+    def __init__(self, img_shape=(MNIST_IMG_SIZE, MNIST_IMG_SIZE)):
+        super().__init__()
+        num_neurons_per_layer = [img_shape[0] * img_shape[1], 512, 256, 1]
 
-    plt.tight_layout()
-    save_name = 'new_images/generated_epoch' + str(
-        epoch_no + 1) + '_batch' + str(batch_no + 1) + '.png'
-    if not os.path.exists('new_images'):
-        os.mkdir('new_images')
-    plt.savefig(save_name, bbox_inches='tight', pad_inches=0)
-    plt.pause(0.0000000001)
-    plt.show()
-
-discriminator = Discriminator()
-generator = Generator().to(device=device)
-
-# Training model
-lr = 0.0001
-num_epochs = 50
-loss_function = nn.BCELoss()
-
-optimizer_discriminator = torch.optim.Adam(discriminator.parameters(), lr=lr)
-optimizer_generator = torch.optim.Adam(generator.parameters(), lr=lr)
-
-for epoch in range(num_epochs):
-    for n, (real_samples, mnist_labels) in enumerate(train_loader):
-        # Data for training the discriminator
-        real_samples = real_samples.to(device=device)
-        real_samples_labels = torch.ones((batch_size, 1)).to(
-            device=device
-        )
-        latent_space_samples = torch.randn((batch_size, 100)).to(
-            device=device
-        )
-        generated_samples = generator(latent_space_samples)
-        generated_samples_labels = torch.zeros((batch_size, 1)).to(
-            device=device
-        )
-        all_samples = torch.cat((real_samples, generated_samples))
-        all_samples_labels = torch.cat(
-            (real_samples_labels, generated_samples_labels)
+        # Last layer is Sigmoid function - basically the goal of the discriminator is to output 1.
+        # for real images and 0. for fake images and sigmoid is clamped between 0 and 1 so it's perfect.
+        self.net = nn.Sequential(
+            *vanilla_block(num_neurons_per_layer[0], num_neurons_per_layer[1], normalize=False),
+            *vanilla_block(num_neurons_per_layer[1], num_neurons_per_layer[2], normalize=False),
+            *vanilla_block(num_neurons_per_layer[2], num_neurons_per_layer[3], normalize=False, activation=nn.Sigmoid())
         )
 
-        # Training the discriminator
-        discriminator.zero_grad()
-        output_discriminator = discriminator(all_samples)
-        loss_discriminator = loss_function(
-            output_discriminator, all_samples_labels
-        )
-        loss_discriminator.backward()
-        optimizer_discriminator.step()
+    def forward(self, img_batch):
+        # Flatten from (N,1,H,W) into (N, HxW)
+        img_batch_flattened = img_batch.view(img_batch.shape[0], -1)
+        return self.net(img_batch_flattened)
 
-        # Data for training the generator
-        latent_space_samples = torch.randn((batch_size, 100)).to(
-            device=device
-        )
+# VANILLA_000000.pth is the model I pretrained for you,
+# feel free to change it if you trained your own model (last section)!
+model_path = os.path.join(BINARIES_PATH, 'VANILLA_000000.pth')
+assert os.path.exists(model_path), f'Could not find the model {model_path}. You first need to train your generator.'
 
-        # Training the generator
-        generator.zero_grad()
-        generated_samples = generator(latent_space_samples)
-        output_discriminator_generated = discriminator(generated_samples)
-        loss_generator = loss_function(
-            output_discriminator_generated, real_samples_labels
-        )
-        loss_generator.backward()
-        optimizer_generator.step()
+# Hopefully you have some GPU ^^ (you do if you’re using Spell)
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        # Show loss
-        if n == batch_size - 1:
-            print(f"Epoch: {epoch} Loss D.: {loss_discriminator}")
-            print(f"Epoch: {epoch} Loss G.: {loss_generator}")
+# let's load the model, this is a dictionary containing model weights but also some metadata
+# commit_hash - simply tells me which version of my code generated this model (hey you have to learn git!)
+# gan_type - this one is "VANILLA" but I also have "DCGAN" and "cGAN" models
+# state_dict - contains the actual neural network weights
+model_state = torch.load(model_path)
+print(f'Model states contains this data: {model_state.keys()}')
 
-            # Save models
-            model_state = {
-                        'epoch': epoch + 1,
-                        'loss_gen':  loss_generator,
-                        'loss_dis': loss_discriminator,
-                        # 'model_gen_state_dict': netG.state_dict(),
-                        # 'model_dis_state_dict': netD.state_dict(),
-                        'optimizer_gen_state_dict': optimizer_generator.state_dict(),
-                        'optimizer_dis_state_dict': optimizer_discriminator.state_dict(),
-                    }
-            print('Saving model...')
-            save_model(model_state, dataroot)
+gan_type = model_state["gan_type"]
+print(f'Using {gan_type} GAN!')
 
-        current_batch_size = real_samples.shape[0]
-        # Each 50 batches show and save images
-        if ((n + 1) % 5 == 0 and current_batch_size == batch_size):
-            print('Saving images...')
-            self.save_images(generated_samples, epoch, n)
+# Let's instantiate a generator net and place it on GPU (if you have one)
+generator = GeneratorNet().to(device)
+# Load the weights, strict=True just makes sure that the architecture corresponds to the weights 100%
+generator.load_state_dict(model_state["state_dict"], strict=True)
+# Puts some layers like batch norm in a good state so it's ready for inference <- fancy name right?
+generator.eval() 
 
-# check samples genreated by GAN
-latent_space_samples = torch.randn(batch_size, 100).to(device=device)
-generated_samples = generator(latent_space_samples)
+# This is where we'll dump images
+generated_imgs_path = os.path.join(DATA_DIR_PATH, 'generated_imagery')  os.makedirs(generated_imgs_path, exist_ok=True)
 
-generated_samples = generated_samples.cpu().detach()
-for i in range(16):
-    ax = plt.subplot(4, 4, i + 1)
-    plt.imshow(generated_samples[i].reshape(28, 28), cmap="gray_r")
-    plt.xticks([])
-    plt.yticks([])
+#
+# This is where the magic happens!
+#
+
+print('Generating new MNIST-like images!')
+generated_img = generate_from_random_latent_vector(generator)
+save_and_maybe_display_image(generated_imgs_path, generated_img, should_display=True)
