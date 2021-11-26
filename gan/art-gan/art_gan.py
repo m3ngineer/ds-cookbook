@@ -8,6 +8,18 @@ import torchvision.transforms as transforms
 
 torch.manual_seed(111)
 
+BINARIES_PATH = os.path.join(os.getcwd(), 'models', 'binaries')
+# Location where semi-trained models (during the training) will get saved to
+CHECKPOINTS_PATH = os.path.join(os.getcwd(), 'models', 'checkpoints')
+# All data both input (MNIST) and generated will be saved here
+DATA_DIR_PATH = os.path.join(os.getcwd(), 'data')
+# We'll be saving images here during GAN training
+DEBUG_IMAGERY_PATH = os.path.join(DATA_DIR_PATH, 'debug_imagery')
+# MNIST images have 28x28 resolution, it's just convenient to put this
+# into a constant you'll see later why
+MNIST_IMG_SIZE = 28
+batch_size = 128
+
 # Decide which device we want to run on
 device = ""
 if torch.cuda.is_available():
@@ -21,7 +33,7 @@ transform = transforms.Compose(
 
 print('Downloading datset...')
 train_set = torchvision.datasets.MNIST(
-    root="artclub_gan/MNIST/raw", train=True, download=False, transform=transform
+    root=DATA_DIR_PATH, train=True, download=True, transform=transform
 )
 
 # We can use an image folder dataset the way we have it setup.
