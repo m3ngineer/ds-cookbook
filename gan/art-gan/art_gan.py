@@ -21,7 +21,7 @@ transform = transforms.Compose(
 
 print('Downloading datset...')
 train_set = torchvision.datasets.MNIST(
-    root="uploads/artclub_gan/MNIST/raw", train=True, download=False, transform=transform
+    root="artclub_gan/MNIST/raw", train=True, download=False, transform=transform
 )
 
 # We can use an image folder dataset the way we have it setup.
