@@ -177,6 +177,9 @@ def get_available_binary_name(gan_type_enum=GANType.VANILLA):
         return f'{prefix}_000000.pth'
 
 ####################### constants #####################
+# Hopefully you have some GPU ^^
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 # For logging purpose
 ref_batch_size = 16
 ref_noise_batch = get_gaussian_latent_batch(ref_batch_size, device)  # Track G's quality during training on fixed noise vectors
@@ -197,9 +200,6 @@ num_epochs = 10  # feel free to increase this
 ########################################################
 
 writer = SummaryWriter()  # (tensorboard) writer will output to ./runs/ directory by default
-
-# Hopefully you have some GPU ^^
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Prepare feed-forward nets (place them on GPU if present) and optimizers which will tweak their weights
 discriminator_net = DiscriminatorNet().train().to(device)
@@ -396,7 +396,7 @@ generator = GeneratorNet().to(device)
 # Load the weights, strict=True just makes sure that the architecture corresponds to the weights 100%
 generator.load_state_dict(model_state["state_dict"], strict=True)
 generator.eval()  # puts some layers like batch norm in a good state so it's ready for inference <- fancy name right?
-    
+
 generated_imgs_path = os.path.join(DATA_DIR_PATH, 'generated_imagery')  # this is where we'll dump images
 os.makedirs(generated_imgs_path, exist_ok=True)
 
