@@ -211,7 +211,8 @@ generator.load_state_dict(model_state["state_dict"], strict=True)
 generator.eval()
 
 # This is where we'll dump images
-generated_imgs_path = os.path.join(DATA_DIR_PATH, 'generated_imagery')  os.makedirs(generated_imgs_path, exist_ok=True)
+generated_imgs_path = os.path.join(DATA_DIR_PATH, 'generated_imagery')
+os.makedirs(generated_imgs_path, exist_ok=True)
 
 #
 # This is where the magic happens!
