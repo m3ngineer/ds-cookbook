@@ -168,7 +168,7 @@ def postprocess_generated_img(generated_img_tensor):
     # Imagery is in the range [-1, 1] (generator has tanh as the output activation) move it into [0, 1] range
     generated_img -= np.min(generated_img)
     generated_img /= np.max(generated_img)
- return generated_img
+    return generated_img
 
 
 # This function will generate a random vector pass it to the generator
