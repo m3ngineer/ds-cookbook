@@ -1,4 +1,5 @@
 import torch
+import os
 from torch import nn
 
 import math
@@ -63,7 +64,7 @@ dataset_path = 'artclub_gan'
 print('Loading data...')
 # Create a data loader which will shuffle the data from train_set
 # and return batches of 32 samples that you’ll use to train the neural networks
-batch_size = 32
+# batch_size = 32
 train_loader = torch.utils.data.DataLoader(
     train_set, batch_size=batch_size, shuffle=True
 )
