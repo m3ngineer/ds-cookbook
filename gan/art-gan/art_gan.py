@@ -154,6 +154,37 @@ class DiscriminatorNet(torch.nn.Module):
         img_batch_flattened = img_batch.view(img_batch.shape[0], -1)
         return self.net(img_batch_flattened)
 
+
+def postprocess_generated_img(generated_img_tensor):
+    assert isinstance(generated_img_tensor, torch.Tensor), f'Expected PyTorch tensor but got {type(generated_img_tensor)}.'
+
+    # Move the tensor from GPU to CPU, convert to numpy array, extract 0th batch,
+    # move the image channel from 0th to 2nd position (CHW -> HWC)
+    generated_img = np.moveaxis(generated_img_tensor.to('cpu').numpy()[0], 0, 2)
+
+    # Since MNIST images are grayscale (1-channel only) repeat 3 times to get RGB image
+    generated_img = np.repeat(generated_img,  3, axis=2)
+
+    # Imagery is in the range [-1, 1] (generator has tanh as the output activation) move it into [0, 1] range
+    generated_img -= np.min(generated_img)
+    generated_img /= np.max(generated_img)
+ return generated_img
+
+
+# This function will generate a random vector pass it to the generator
+# which will generate a new image, which we will just post-process and return it
+def generate_from_random_latent_vector(generator):
+    # Tells PyTorch not to compute gradients which would have huge memory footprint
+    with torch.no_grad():
+        # Generate a single random (latent) vector
+        latent_vector = get_gaussian_latent_batch(1, next(generator.parameters()).device)
+
+        # Post process generator output (as it's in the [-1, 1] range, remember?)
+        generated_img = postprocess_generated_img(generator(latent_vector))
+
+    return generated_img
+
+
 # VANILLA_000000.pth is the model I pretrained for you,
 # feel free to change it if you trained your own model (last section)!
 model_path = os.path.join(BINARIES_PATH, 'VANILLA_000000.pth')
@@ -177,7 +208,7 @@ generator = GeneratorNet().to(device)
 # Load the weights, strict=True just makes sure that the architecture corresponds to the weights 100%
 generator.load_state_dict(model_state["state_dict"], strict=True)
 # Puts some layers like batch norm in a good state so it's ready for inference <- fancy name right?
-generator.eval() 
+generator.eval()
 
 # This is where we'll dump images
 generated_imgs_path = os.path.join(DATA_DIR_PATH, 'generated_imagery')  os.makedirs(generated_imgs_path, exist_ok=True)
