@@ -150,7 +150,7 @@ def get_optimizers(d_net, g_net):
 # It's useful to add some metadata when saving your model, it should probably make sense to also add the number of epochs
 def get_training_state(generator_net, gan_type_name):
     training_state = {
-        "commit_hash": git.Repo(search_parent_directories=True).head.object.hexsha,
+        # "commit_hash": git.Repo('ds-cookbook', search_parent_directories=True).head.object.hexsha,
         "state_dict": generator_net.state_dict(),
         "gan_type": gan_type_name
     }
