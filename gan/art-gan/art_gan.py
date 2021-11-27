@@ -218,6 +218,7 @@ ts = time.time()  # start measuring time
 
 # GAN training loop, it's always smart to first train the discriminator so as to avoid mode collapse!
 # A mode collapse, for example, is when your generator learns to only generate a single digit instead of all 10 digits!
+os.makedirs(DEBUG_IMAGERY_PATH, exist_ok=True)
 for epoch in range(num_epochs):
     for batch_idx, (real_images, _) in enumerate(mnist_data_loader):
 
