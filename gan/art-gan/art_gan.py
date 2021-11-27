@@ -199,7 +199,7 @@ debug_imagery_log_freq = 50
 checkpoint_freq = 2
 
 # For training purpose
-num_epochs = 10  # feel free to increase this
+num_epochs = 50  # feel free to increase this
 
 ########################################################
 
