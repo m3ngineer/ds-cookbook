@@ -26,6 +26,10 @@ CHECKPOINTS_PATH = os.path.join(os.getcwd(), 'models', 'checkpoints')  # semi-tr
 DATA_DIR_PATH = os.path.join(os.getcwd(), 'data')  # all data both input (MNIST) and generated will be stored here
 DEBUG_IMAGERY_PATH = os.path.join(DATA_DIR_PATH, 'debug_imagery')  # we'll be dumping images here during GAN training
 
+os.makedirs(BINARIES_PATH, exist_ok=True)
+os.makedirs(CHECKPOINTS_PATH, exist_ok=True)
+os.makedirs(DEBUG_IMAGERY_PATH, exist_ok=True)
+
 MNIST_IMG_SIZE = 28  # MNIST images have 28x28 resolution, it's just convinient to put this into a constant you'll see later why
 
 batch_size = 128
@@ -218,7 +222,7 @@ ts = time.time()  # start measuring time
 
 # GAN training loop, it's always smart to first train the discriminator so as to avoid mode collapse!
 # A mode collapse, for example, is when your generator learns to only generate a single digit instead of all 10 digits!
-os.makedirs(DEBUG_IMAGERY_PATH, exist_ok=True)
+
 for epoch in range(num_epochs):
     for batch_idx, (real_images, _) in enumerate(mnist_data_loader):
 
