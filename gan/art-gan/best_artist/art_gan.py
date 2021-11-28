@@ -45,7 +45,7 @@ transform = transforms.Compose([
         transforms.Normalize(*stats)
     ])
 
-train_dataset = datasets.ImageFolder(root=os.path.join(DATA_DIR_PATH,'resized'),
+train_dataset = datasets.ImageFolder(root=os.path.join(DATA_DIR_PATH,'resized','resized'),
                                      transform=transform)
 
 train_data_loader = DataLoader(train_dataset, batch_size, shuffle=True, num_workers=3, pin_memory=True)
@@ -86,7 +86,7 @@ def show_batch(dl, nmax=64):
     for images, _ in dl:
         show_images(images, nmax)
         break
-        
+
 def get_default_device():
     """Pick GPU if available, else CPU"""
     if torch.cuda.is_available():
