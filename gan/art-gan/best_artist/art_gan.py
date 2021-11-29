@@ -23,7 +23,12 @@ from torch.utils.tensorboard import SummaryWriter
 # Let's create some constant to make stuff a bit easier
 BINARIES_PATH = os.path.join(os.getcwd(), 'models', 'binaries')  # location where trained models are located
 CHECKPOINTS_PATH = os.path.join(os.getcwd(), 'models', 'checkpoints')  # semi-trained models during training will be dumped here
-DATA_DIR_PATH = os.path.join(os.getcwd(), 'data')  # all data both input (MNIST) and generated will be stored here
+if torch.cuda.is_available():
+    # Spell used
+    DATA_DIR_PATH = os.path.join(os.getcwd(), 'artclub_gan')
+else:
+    # Locally run
+    DATA_DIR_PATH = os.path.join(os.getcwd(), 'data')
 DEBUG_IMAGERY_PATH = os.path.join(DATA_DIR_PATH, 'debug_imagery')  # we'll be dumping images here during GAN training
 
 os.makedirs(BINARIES_PATH, exist_ok=True)
