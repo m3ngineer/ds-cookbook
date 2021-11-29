@@ -34,9 +34,7 @@ DEBUG_IMAGERY_PATH = os.path.join(DATA_DIR_PATH, 'debug_imagery')  # we'll be du
 os.makedirs(BINARIES_PATH, exist_ok=True)
 os.makedirs(CHECKPOINTS_PATH, exist_ok=True)
 os.makedirs(DEBUG_IMAGERY_PATH, exist_ok=True)
-print(os.listdir())
-print(os.listdir('./data'))
-print(os.listdir('./artclub_gan'))
+
 MNIST_IMG_SIZE = 64  # MNIST images have 28x28 resolution, it's just convinient to put this into a constant you'll see later why
 
 batch_size = 128
