@@ -50,7 +50,7 @@ transform = transforms.Compose([
         transforms.Normalize(*stats)
     ])
 
-train_dataset = datasets.ImageFolder(root=os.path.join(DATA_DIR_PATH,'resized','resized'),
+train_dataset = datasets.ImageFolder(root=os.path.join(DATA_DIR_PATH,'resized'),
                                      transform=transform)
 
 train_data_loader = DataLoader(train_dataset, batch_size, shuffle=True, num_workers=3, pin_memory=True)
