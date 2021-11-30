@@ -23,15 +23,18 @@ from torch.utils.tensorboard import SummaryWriter
 # Let's create some constant to make stuff a bit easier
 BINARIES_PATH = os.path.join(os.getcwd(), 'models', 'binaries')  # location where trained models are located
 CHECKPOINTS_PATH = os.path.join(os.getcwd(), 'models', 'checkpoints')  # semi-trained models during training will be dumped here
-DATA_DIR_PATH = os.path.join(os.getcwd(), 'data')  # all data both input (MNIST) and generated will be stored here
+if torch.cuda.is_available():
+    # Spell used
+    DATA_DIR_PATH = os.path.join(os.getcwd(), 'artclub_gan')
+else:
+    # Locally run
+    DATA_DIR_PATH = os.path.join(os.getcwd(), 'data')
 DEBUG_IMAGERY_PATH = os.path.join(DATA_DIR_PATH, 'debug_imagery')  # we'll be dumping images here during GAN training
 
 os.makedirs(BINARIES_PATH, exist_ok=True)
 os.makedirs(CHECKPOINTS_PATH, exist_ok=True)
 os.makedirs(DEBUG_IMAGERY_PATH, exist_ok=True)
-print(os.listdir())
-print(os.listdir('./data'))
-print(os.listdir('./artclub_gan'))
+
 MNIST_IMG_SIZE = 64  # MNIST images have 28x28 resolution, it's just convinient to put this into a constant you'll see later why
 
 batch_size = 128
@@ -47,7 +50,7 @@ transform = transforms.Compose([
         transforms.Normalize(*stats)
     ])
 
-train_dataset = datasets.ImageFolder(root=os.path.join(DATA_DIR_PATH,'resized','resized'),
+train_dataset = datasets.ImageFolder(root=os.path.join(DATA_DIR_PATH,'resized'),
                                      transform=transform)
 
 train_data_loader = DataLoader(train_dataset, batch_size, shuffle=True, num_workers=3, pin_memory=True)
