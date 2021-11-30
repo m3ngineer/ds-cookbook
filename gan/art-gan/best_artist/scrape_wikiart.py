@@ -13,7 +13,6 @@ from bs4 import BeautifulSoup
 import time
 
 def get_images(url):
-  print(url)
   genre_soup = BeautifulSoup(urllib.request.urlopen(url), "lxml")
   artist_list_main = genre_soup.find("main")
   lis = artist_list_main.find_all("li")
@@ -65,11 +64,8 @@ def get_images(url):
 
             # get the painting
             url = base_url + painting
-            print(url)
-
             try:
               painting_soup = BeautifulSoup(urllib.request.urlopen(url), "lxml")
-
             except:
               print("error retreiving page")
               continue
@@ -77,23 +73,32 @@ def get_images(url):
             # check the copyright
             if "Public domain" in painting_soup.text:
 
-              # get the url
-              og_image = painting_soup.find("meta", {"property":"og:image"})
-              image_url = og_image["content"].split("!")[0] # ignore the !Large.jpg at the end
-              print(image_url)
+              # check that artwork is of Cubism style
+              styles = [node for node in painting_soup.find_all("s") if node.text == 'Style:']
+              if len(styles) > 0:
+                try:
+                  style = styles[0].next_sibling.next_sibling.find('a').text
+                except Exception as e:
+                  print(e)
+                  continue
+                if 'cubism' in style.lower():
 
-              parts = url.split("/")
-              painting_name = parts[-1]
-              save_path = file_path + "/" + artist_name + "_" + painting_name + ".jpg"
+                  # get the url
+                  og_image = painting_soup.find("meta", {"property":"og:image"})
+                  image_url = og_image["content"].split("!")[0] # ignore the !Large.jpg at the end
 
-              #download the file
-              try:
-                print("downloading to " + save_path)
-                time.sleep(0.2)  # try not to get a 403
-                urllib.request.urlretrieve(image_url, save_path)
-                image_count = image_count + 1
-              except Exception as e:
-                print("failed downloading " + image_url, e)
+                  parts = url.split("/")
+                  painting_name = parts[-1]
+                  save_path = file_path + "/" + artist_name + "_" + painting_name + ".jpg"
+
+                  #download the file
+                  try:
+                    print("downloading to " + save_path)
+                    time.sleep(0.2)  # try not to get a 403
+                    urllib.request.urlretrieve(image_url, save_path)
+                    image_count = image_count + 1
+                  except Exception as e:
+                    print("failed downloading " + image_url, e)
 
 base_url = "https://www.wikiart.org"
 urls = []
