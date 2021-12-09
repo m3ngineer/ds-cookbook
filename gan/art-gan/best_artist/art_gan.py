@@ -54,9 +54,9 @@ train_dataset = datasets.ImageFolder(root=os.path.join(DATA_DIR_PATH,'cubist_pai
 
 train_data_loader = DataLoader(train_dataset, batch_size, shuffle=True, num_workers=3, pin_memory=True)
 
-images,_ = train_dataset[382]
-print(images.size())
-plt.imshow(images.permute(1,2,0))
+# images,_ = train_dataset[382]
+# print(images.size())
+# plt.imshow(images.permute(1,2,0))
 # plt.show()
 # exit()
 # Size of the generator's input vector. Generator will eventually learn how to map these into meaningful images!
