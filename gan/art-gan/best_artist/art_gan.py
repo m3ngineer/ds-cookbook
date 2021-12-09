@@ -251,6 +251,18 @@ fixed_latent = torch.randn(64, latent_size, 1, 1, device=device)
 
 save_samples(0, fixed_latent)
 
+def save_model(model_state, path):
+
+    torch.save(model_state, os.path.join(path, 'model_checkpoint.pt'))
+    # If loss is better then previous checkpoint
+    loss_gen = model_state['loss_gen']
+    loss_dis = model_state['loss_dis']
+    loss_gen_min = model_state['loss_gen_min']
+    loss_dis_min = model_state['loss_dis_min']
+    if (loss_gen <= loss_gen_min) & (loss_dis <= loss_dis_min):
+        print('Validation loss decreased (Generator: {:.6f} --> {:.6f}, Discriminator: {:.6f} --> {:.6f}).  Saving model ...'.format(loss_gen_min,loss_gen,loss_dis_min,loss_dis))
+        torch.save(model_state, os.path.join(path, 'model.pt'))
+
 import torch.nn.functional as F
 
 def fit(epochs, lr, start_idx=1):
@@ -279,12 +291,29 @@ def fit(epochs, lr, start_idx=1):
         real_scores.append(real_score)
         fake_scores.append(fake_score)
 
+        loss_gen_min = min(losses_g)
+        loss_dis_min = min(losses_d)
+
         # Log losses & scores (last batch)
         print("Epoch [{}/{}], loss_g: {:.4f}, loss_d: {:.4f}, real_score: {:.4f}, fake_score: {:.4f}".format(
             epoch+1, epochs, loss_g, loss_d, real_score, fake_score))
 
         # Save generated images
         save_samples(epoch+start_idx, fixed_latent, show=False)
+
+        # Save model
+        model_state = {
+                    'epoch': epoch + 1,
+                    'loss_gen':  loss_g,
+                    'loss_dis': loss_d,
+                    'loss_gen_min': loss_gen_min,
+                    'loss_dis_min': loss_dis_min,
+                    'model_gen_state_dict': generator.state_dict(),
+                    'model_dis_state_dict': discriminator.state_dict(),
+                    'optimizer_gen_state_dict': opt_g.state_dict(),
+                    'optimizer_dis_state_dict': opt_d.state_dict(),
+                }
+        save_model(model_state, CHECKPOINTS_PATH)
 
     return losses_g, losses_d, real_scores, fake_scores
 
