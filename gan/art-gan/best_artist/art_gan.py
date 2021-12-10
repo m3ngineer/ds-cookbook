@@ -30,6 +30,8 @@ else:
     # Locally run
     DATA_DIR_PATH = os.path.join(os.getcwd(), 'data')
 DEBUG_IMAGERY_PATH = os.path.join(DATA_DIR_PATH, 'debug_imagery')  # we'll be dumping images here during GAN training
+# DATA_DIR_SUBPATH = 'cubist_paintings'
+DATA_DIR_SUBPATH = 'img_align_celeba'
 
 os.makedirs(BINARIES_PATH, exist_ok=True)
 os.makedirs(CHECKPOINTS_PATH, exist_ok=True)
@@ -50,7 +52,7 @@ transform = transforms.Compose([
         transforms.Normalize(*stats)
     ])
 
-train_dataset = datasets.ImageFolder(root=os.path.join(DATA_DIR_PATH,'cubist_paintings'),
+train_dataset = datasets.ImageFolder(root=os.path.join(DATA_DIR_PATH,DATA_DIR_SUBPATH),
                                      transform=transform)
 
 train_data_loader = DataLoader(train_dataset, batch_size, shuffle=True, num_workers=3, pin_memory=True)
@@ -316,7 +318,6 @@ def fit(epochs, lr, start_idx=1):
         save_model(model_state, CHECKPOINTS_PATH)
 
     return losses_g, losses_d, real_scores, fake_scores
-
 lr = 0.001
 epochs = 150
 history = fit(epochs,lr)
