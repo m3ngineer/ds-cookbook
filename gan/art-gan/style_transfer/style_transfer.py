@@ -1,14 +1,22 @@
 # Source: https://github.com/alejandrods/Style-Transfer-PyTorch-Keras/blob/master/Style_Transfer_Pytorch.ipynb
 
-%matplotlib inline
-
 from PIL import Image
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 import torch
 import torch.optim as optim
 from torchvision import transforms, models
+from torchvision.utils import save_image
+
+if torch.cuda.is_available():
+    # Spell used
+    DATA_DIR_PATH = os.path.join(os.getcwd(), 'style_transfer')
+else:
+    # Locally run
+    DATA_DIR_PATH = os.path.join(os.getcwd(), 'data')
+DATA_DIR_SUBPATH = 'images'
 
 # get the "features" portion of VGG19 (we will not need the "classifier" portion)
 vgg = models.vgg19(pretrained=True).features
@@ -49,9 +57,9 @@ def load_image(img_path, max_size=400, shape=None):
     return image
 
 # load in content and style image
-content = load_image('images/magritte.jpg').to(device)
+content = load_image(os.path.join(os.path.join(DATA_DIR_PATH, 'content'), 'rupaul_face.png')).to(device)
 # Resize style to match content, makes code easier
-style = load_image('images/sorolla.jpg', shape=content.shape[-2:]).to(device)
+style = load_image(os.path.join(os.path.join(DATA_DIR_PATH, 'style'), 'Vasiliy_Kandinskiy_76.jpg'), shape=content.shape[-2:]).to(device)
 
 # helper function for un-normalizing an image
 # and converting it from a Tensor image to a NumPy image for display
@@ -66,11 +74,11 @@ def im_convert(tensor):
 
     return image
 
-# display the images
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 10))
-# content and style ims side-by-side
-ax1.imshow(im_convert(content))
-ax2.imshow(im_convert(style))
+# # display the images
+# fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 10))
+# # content and style ims side-by-side
+# ax1.imshow(im_convert(content))
+# ax2.imshow(im_convert(style))
 
 def get_features(image, model, layers=None):
     """ Run an image forward through a model and get the features for
@@ -140,14 +148,23 @@ content_weight = 1  # alpha
 style_weight = 1e7  # beta
 
 # for displaying the target image, intermittently
-show_every = 400
+show_every = 4000
+
+# for saving target image, intermittently
+save_every = 200
+sample_dir = 'generated_images'
+os.makedirs(sample_dir, exist_ok=True)
+stats = (0.5, 0.5, 0.5), (0.5, 0.5, 0.5)
 
 # iteration hyperparameters
 optimizer = optim.Adam([target], lr=0.003)
 steps = 2000  # decide how many iterations to update your image (5000)
 
-for ii in range(1, steps+1):
+def denorm(img_tensors):
+    return img_tensors * stats[1][0] + stats[0][0]
 
+for ii in range(1, steps+1):
+    print('Step: {}'.format(ii))
     # get the features from your target image
     target_features = get_features(target, vgg)
 
@@ -183,6 +200,11 @@ for ii in range(1, steps+1):
         print('Total loss: ', total_loss.item())
         plt.imshow(im_convert(target))
         plt.show()
+
+    if ii % save_every == 0:
+        img_name = 'generated-images-{0:0=4d}.png'.format(ii)
+        save_image(denorm(target), os.path.join(sample_dir, img_name))
+        print('Saving ', img_name)
 
 # display content and final, target image
 fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(20, 10))
