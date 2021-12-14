@@ -10,6 +10,7 @@ import torch.optim as optim
 from torchvision import transforms, models
 from torchvision.utils import save_image
 
+## Parameters
 if torch.cuda.is_available():
     # Spell used
     DATA_DIR_PATH = os.path.join(os.getcwd(), 'style_transfer')
@@ -207,10 +208,10 @@ for ii in range(1, steps+1):
         print('Saving ', img_name)
 
 # display content and final, target image
-fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(20, 10))
-ax1.imshow(im_convert(content))
-ax1.set_title('Content')
-ax2.imshow(im_convert(style))
-ax2.set_title('Style')
-ax3.imshow(im_convert(target))
-ax3.set_title('Target')
+# fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(20, 10))
+# ax1.imshow(im_convert(content))
+# ax1.set_title('Content')
+# ax2.imshow(im_convert(style))
+# ax2.set_title('Style')
+# ax3.imshow(im_convert(target))
+# ax3.set_title('Target')
