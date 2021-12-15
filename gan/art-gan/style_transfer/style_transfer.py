@@ -4,6 +4,7 @@ from PIL import Image
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import argparse
 
 import torch
 import torch.optim as optim
@@ -18,6 +19,15 @@ else:
     # Locally run
     DATA_DIR_PATH = os.path.join(os.getcwd(), 'data')
 DATA_DIR_SUBPATH = 'images'
+
+# Get images
+parser = argparse.ArgumentParser()
+parser.add_argument("-c", "--content", help="Name of image file to be used as content", required=True)
+parser.add_argument("-s", "--style", help="Name of image file to be used to extract style from", required=True)
+args = parser.parse_args()
+
+IMG_CONTENT = args.content
+IMG_STYLE = args.style
 
 # get the "features" portion of VGG19 (we will not need the "classifier" portion)
 vgg = models.vgg19(pretrained=True).features
@@ -58,9 +68,9 @@ def load_image(img_path, max_size=400, shape=None):
     return image
 
 # load in content and style image
-content = load_image(os.path.join(os.path.join(DATA_DIR_PATH, 'content'), 'rupaul_face.png')).to(device)
+content = load_image(os.path.join(os.path.join(DATA_DIR_PATH, 'content'), IMG_CONTENT)).to(device)
 # Resize style to match content, makes code easier
-style = load_image(os.path.join(os.path.join(DATA_DIR_PATH, 'style'), 'Vasiliy_Kandinskiy_76.jpg'), shape=content.shape[-2:]).to(device)
+style = load_image(os.path.join(os.path.join(DATA_DIR_PATH, 'style'), IMG_STYLE), shape=content.shape[-2:]).to(device)
 
 # helper function for un-normalizing an image
 # and converting it from a Tensor image to a NumPy image for display
