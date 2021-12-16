@@ -25,11 +25,13 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--content", help="Name of image file to be used as content", required=True)
 parser.add_argument("-s", "--style", help="Name of image file to be used to extract style from", required=True)
 parser.add_argument("-i", "--iterations", help="Number of iterations to update image", default=2000, type=int, required=False)
+parser.add_argument("-v", "--save_step", help="Number of iterations to save image", default=1000, type=int, required=False)
 args = parser.parse_args()
 
 IMG_CONTENT = args.content
 IMG_STYLE = args.style
 STEPS = args.iterations
+IMG_SAVE_STEP = args.save_step
 
 # get the "features" portion of VGG19 (we will not need the "classifier" portion)
 vgg = models.vgg19(pretrained=True).features
@@ -161,10 +163,10 @@ content_weight = 1  # alpha
 style_weight = 1e7  # beta
 
 # for displaying the target image, intermittently
-show_every = 4000
+show_every = 10000
 
 # for saving target image, intermittently
-save_every = 200
+IMG_SAVE_STEP = 1000
 sample_dir = 'generated_images'
 os.makedirs(sample_dir, exist_ok=True)
 stats = (0.5, 0.5, 0.5), (0.5, 0.5, 0.5)
@@ -213,7 +215,7 @@ for ii in range(1, STEPS+1):
         plt.imshow(im_convert(target))
         plt.show()
 
-    if ii % save_every == 0:
+    if ii % IMG_SAVE_STEP == 0:
         img_name = 'generated-images-{0:0=4d}.png'.format(ii)
         save_image(denorm(target), os.path.join(sample_dir, img_name))
         print('Saving ', img_name)
