@@ -24,10 +24,12 @@ DATA_DIR_SUBPATH = 'images'
 parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--content", help="Name of image file to be used as content", required=True)
 parser.add_argument("-s", "--style", help="Name of image file to be used to extract style from", required=True)
+parser.add_argument("-i", "--iterations", help="Number of iterations to update image", default=2000, required=False)
 args = parser.parse_args()
 
 IMG_CONTENT = args.content
 IMG_STYLE = args.style
+STEPS = args.interations
 
 # get the "features" portion of VGG19 (we will not need the "classifier" portion)
 vgg = models.vgg19(pretrained=True).features
@@ -169,12 +171,11 @@ stats = (0.5, 0.5, 0.5), (0.5, 0.5, 0.5)
 
 # iteration hyperparameters
 optimizer = optim.Adam([target], lr=0.003)
-steps = 2000  # decide how many iterations to update your image (5000)
 
 def denorm(img_tensors):
     return img_tensors * stats[1][0] + stats[0][0]
 
-for ii in range(1, steps+1):
+for ii in range(1, STEPS+1):
     print('Step: {}'.format(ii))
     # get the features from your target image
     target_features = get_features(target, vgg)
