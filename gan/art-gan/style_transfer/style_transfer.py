@@ -29,7 +29,7 @@ args = parser.parse_args()
 
 IMG_CONTENT = args.content
 IMG_STYLE = args.style
-STEPS = args.interations
+STEPS = args.iterations
 
 # get the "features" portion of VGG19 (we will not need the "classifier" portion)
 vgg = models.vgg19(pretrained=True).features
