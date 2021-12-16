@@ -24,7 +24,7 @@ DATA_DIR_SUBPATH = 'images'
 parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--content", help="Name of image file to be used as content", required=True)
 parser.add_argument("-s", "--style", help="Name of image file to be used to extract style from", required=True)
-parser.add_argument("-i", "--iterations", help="Number of iterations to update image", default=2000, required=False)
+parser.add_argument("-i", "--iterations", help="Number of iterations to update image", default=2000, type=int, required=False)
 args = parser.parse_args()
 
 IMG_CONTENT = args.content
