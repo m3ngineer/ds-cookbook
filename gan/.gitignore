@@ -2,3 +2,7 @@ data/
 *.jpg
 *.png
 *.jpeg
+bin/
+poke-gan/
+runs/
+models/
